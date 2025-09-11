@@ -50,8 +50,8 @@
             <label for="inputEmail3" class="col-lg-2 col-sm-12 col-form-label">Aktif</label>
             <div class="col-lg-10 col-sm-12">
               <select class="form-control select2" style="width: 100%;" name="is_active">
-                <option <?= (isset($model) && $model->is_active == 0) ? 'selected' : '' ?> value="0">No</option>
-                <option <?= (isset($model) && $model->is_active == 1) ? 'selected' : '' ?> value="1">Yes</option>
+                <option <?= (isset($model) && $model->is_active === false) ? 'selected' : '' ?> value="0">No</option>
+                <option <?= (isset($model) && $model->is_active === true) ? 'selected' : '' ?> value="1">Yes</option>
               </select>
             </div>
           </div>

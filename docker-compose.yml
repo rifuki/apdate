@@ -1,51 +1,60 @@
 services:
   web:
-    image: php:7.4-apache
+    image: php:8.0-apache
+    container_name: apdate_web
     ports:
       - "8080:80"
     volumes:
       - .:/var/www/html
-    depends_on:
-      - db
     environment:
-      - DB_HOST=db
-      - DB_NAME=apdate
-      - DB_USER=root
-      - DB_PASS=rootpass
+      - DB_HOST=${DB_HOST:-postgres}
+      - DB_NAME=${DB_NAME:-apdate}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASS=${DB_PASS:-postgres123}
+    depends_on:
+      - postgres
     command: >
       bash -c "
-        docker-php-ext-install pdo pdo_mysql mysqli &&
-        a2enmod rewrite &&
-        chown -R www-data:www-data /var/www/html &&
-        chmod -R 777 /var/www/html/application/logs &&
-        chmod -R 777 /var/www/html/application/cache &&
-        chmod -R 777 /var/www/html/upload &&
-        apache2-foreground
+      apt-get update && 
+      apt-get install -y libpq-dev unzip libpng-dev libjpeg-dev libfreetype6-dev libzip-dev && 
+      docker-php-ext-configure gd --with-freetype --with-jpeg &&
+      docker-php-ext-install pdo pdo_pgsql pgsql gd zip && 
+      a2enmod rewrite && 
+      curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer &&
+      cd /var/www/html && composer install --no-dev --optimize-autoloader --no-interaction || composer update --no-dev --optimize-autoloader --no-interaction || echo 'Composer install failed, continuing...' &&
+      find /var/www/html -type d -name .git -prune -o -type f -exec chown www-data:www-data {} + &&
+      find /var/www/html -type d -name .git -prune -o -type d -exec chown www-data:www-data {} + &&
+      chmod -R 777 /var/www/html/application/logs &&
+      chmod -R 777 /var/www/html/application/cache &&
+      chmod -R 777 /var/www/html/upload &&
+      apache2-foreground
       "
 
-  db:
-    image: mysql:8.0
-    ports:
-      - "3306:3306"
+  postgres:
+    image: postgres:13
+    container_name: apdate_postgres
+    restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: apdate
-      MYSQL_USER: apdate_user
-      MYSQL_PASSWORD: apdate_pass
+      POSTGRES_DB: apdate
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    ports:
+      - "5432:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
-      - ./DB_UPDATE.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data
+      - ./database.sql:/docker-entrypoint-initdb.d/init.sql
 
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: apdate_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
     ports:
       - "8081:80"
-    environment:
-      PMA_HOST: db
-      PMA_USER: root
-      PMA_PASSWORD: rootpass
     depends_on:
-      - db
+      - postgres
 
 volumes:
-  mysql_data:
+  postgres_data:

@@ -156,7 +156,7 @@
 		$CI->db->from("mt_periode_semester as a");
 		$CI->db->join("mt_periode as b", "a.periode_id = b.id");
 		$CI->db->join("mt_status_periode as c", "a.status = c.code", "left");
-		$CI->db->where('a.is_active', 1);
+		$CI->db->where('a.is_active', TRUE);
 		$data = $CI->db->get()->row_array();
 		return $data;
 	}
@@ -186,7 +186,7 @@
 		return $query->row_array();
 	}
 
-	function menu_data($session, $is_config = 0) {
+	function menu_data($session, $is_config = FALSE) {
 		$CI =& get_instance();
 
 		$user_access = $session['user_access'];

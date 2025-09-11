@@ -42,11 +42,11 @@ class SettingPeriode extends CI_Controller {
 				$semester = $post['semester'];
 				$status = $post['status'];
 
-				$reset_all = $this->db->where('is_active', 1)->update('mt_periode_semester', ['is_active' => 0]);
-				$reset_all = $this->db->where('is_active', 1)->update('mt_periode', ['is_active' => 0]);
+				$reset_all = $this->db->where('is_active', TRUE)->update('mt_periode_semester', ['is_active' => FALSE]);
+				$reset_all = $this->db->where('is_active', TRUE)->update('mt_periode', ['is_active' => FALSE]);
 
-				$update_periode = $this->db->where('id', $periode_id)->update('mt_periode', ['is_active' => 1]);
-				$update_periode_semester = $this->db->where('periode_id', $periode_id)->where('semester', $semester)->update('mt_periode_semester', ['is_active' => 1, 'status' => $status]);
+				$update_periode = $this->db->where('id', $periode_id)->update('mt_periode', ['is_active' => TRUE]);
+				$update_periode_semester = $this->db->where('periode_id', $periode_id)->where('semester', $semester)->update('mt_periode_semester', ['is_active' => TRUE, 'status' => $status]);
 				
 				if (!$update_periode || !$update_periode_semester) {
 					throw new Exception("Gagal mengubah setting periode");

@@ -55,11 +55,18 @@
 			return $result[0]->MAX_ID;
 		}
 		function deleteData($tabel,$where){
-			$sql = "DECLARE child_exists EXCEPTION; PRAGMA EXCEPTION_INIT(child_exists, -2292); BEGIN DELETE $tabel WHERE $where; EXCEPTION WHEN child_exists THEN null; END;";
-			$this->db->query($sql);
+			$sql = "DELETE FROM $tabel WHERE $where";
+			try {
+				$this->db->query($sql);
+			} catch (Exception $e) {
+				if (strpos($e->getMessage(), '23503') !== false) {
+					return false;
+				}
+				throw $e;
+			}
 		}
 		function updateDataClob($tabel,$kolom_update,$kolom_key,$kolom_val,$databaru){
-			$SQL = "UPDATE $tabel SET $kolom_update = $kolom_update || to_clob('$databaru') WHERE $kolom_key = $kolom_val";
+			$SQL = "UPDATE $tabel SET $kolom_update = $kolom_update || '$databaru' WHERE $kolom_key = $kolom_val";
 			$this->db->query($SQL);
 		}
 

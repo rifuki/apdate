@@ -11,7 +11,7 @@
 		}
 
 		private function _get_datatables_query($filter = []) {
-			$this->db->select("tref_kelas.id, tref_kelas.kelas, CONCAT(IFNULL(mt_users_guru.nip, ''), ' - ', IFNULL(mt_users_guru.nama, '')) as wali_kelas");
+			$this->db->select("tref_kelas.id, tref_kelas.kelas, COALESCE(mt_users_guru.nip, '') || ' - ' || COALESCE(mt_users_guru.nama, '') as wali_kelas");
 			$this->db->from($this->table);
 			$this->db->join('mt_users_guru', $this->table.'.guru_id = mt_users_guru.id');
 			$i = 0;  
@@ -96,7 +96,7 @@
 
 		public function find_active_periode() {
 			$this->db->from('mt_periode');
-			$this->db->where('is_active', 1);
+			$this->db->where('is_active', TRUE);
 			$query = $this->db->get();
 
 			return $query->row();

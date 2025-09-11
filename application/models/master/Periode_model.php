@@ -63,7 +63,7 @@
 		public function find($id) {
 			$this->db->select("A.*, B.semester");
 			$this->db->from('mt_periode as A');
-			$this->db->join('mt_periode_semester as B', 'B.periode_id = A.id AND B.is_active = 1', 'left');
+			$this->db->join('mt_periode_semester as B', 'B.periode_id = A.id AND B.is_active = TRUE', 'left');
 			$this->db->where('A.id', $id);
 			$this->db->where('A.deleted_at IS NULL');
 			$query = $this->db->get();

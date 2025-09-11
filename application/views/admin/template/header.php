@@ -9,7 +9,6 @@
   <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
   <link rel="stylesheet" href="<?php echo base_url() ?>/assets/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
   <link rel="stylesheet" href="<?php echo base_url() ?>/assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
-  <link rel="stylesheet" href="<?php echo base_url() ?>/assets/plugins/jqvmap/jqvmap.min.css">
   <link rel="stylesheet" href="<?php echo base_url() ?>/assets/dist/css/adminlte.min.css">
   <link rel="stylesheet" href="<?php echo base_url() ?>/assets/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
   <link rel="stylesheet" href="<?php echo base_url() ?>/assets/plugins/daterangepicker/daterangepicker.css">
@@ -103,8 +102,8 @@
       </div>
 
       <?php 
-        $menu = menu_data($session, 0);
-        $menu_config = menu_data($session, 1);
+        $menu = menu_data($session, FALSE);
+        $menu_config = menu_data($session, TRUE);
       ?>
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">

@@ -42,7 +42,7 @@ class Periode extends CI_Controller {
             $row_menu = array();
             $row_menu[] = $no;
             $row_menu[] = $field->tahun_ajaran;
-            $row_menu[] = $field->is_active == 1 ? '<span class="p-2 bg-success">Aktif</span>' : '<span class="p-2 bg-secondary">Non Aktif</span>';
+            $row_menu[] = $field->is_active === true ? '<span class="p-2 bg-success">Aktif</span>' : '<span class="p-2 bg-secondary">Non Aktif</span>';
 
             $btn_update = "";
             $btn_delete = "";
@@ -140,9 +140,9 @@ class Periode extends CI_Controller {
 
 			// $post_data["updated_at"] = date("Y-m-d H:i:s");
 			unset($post_data["id"]);
-			if ($post_data['is_active'] == 1) {
+			if ($post_data['is_active'] === '1') {
 				$update_all = [
-					"is_active" => 0
+					"is_active" => FALSE
 				];
 				$save = $this->Dbhelper->updateData($this->table, array(), $update_all);
 			}
@@ -207,7 +207,7 @@ class Periode extends CI_Controller {
 			$post_data["semester"] = 1;
 			$insert_periode = $this->Dbhelper->insertDataWithReturnID($this->table, [
 				"tahun_ajaran" => $post_data["tahun_ajaran"],
-				"is_active" => 0
+				"is_active" => FALSE
 			], true);
 
 			$periode_id = $insert_periode;
@@ -215,12 +215,12 @@ class Periode extends CI_Controller {
 				[
 					"periode_id" => $periode_id,
 					"semester" => 1,
-					"is_active" => 0
+					"is_active" => FALSE
 				],
 				[
 					"periode_id" => $periode_id,
 					"semester" => 2,
-					"is_active" => 0
+					"is_active" => FALSE
 				]
 			];
 			$save = $this->db->insert_batch('mt_periode_semester', $post_semester);
