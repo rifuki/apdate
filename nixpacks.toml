@@ -1,0 +1,8 @@
+[build]
+buildCmd = "echo 'Using Docker'"
+
+[start]
+cmd = "echo 'Using Docker'"
+
+[variables]
+NIXPACKS_NO_CACHE = "1"
