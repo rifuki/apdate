@@ -1,12 +1,19 @@
-## REMOVE INDEX.PHP START ##
+## FORCE HTTPS START ##
 <IfModule mod_rewrite.c>
 RewriteEngine On
+
+# Force HTTPS in production
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Remove index.php
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php/$1 [L] 
 
 </IfModule>
-## REMOVE INDEX.PHP END ##
+## FORCE HTTPS END ##
 
 
 ## EXPIRES CACHING START ##

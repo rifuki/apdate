@@ -1,8 +1,17 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-$config['base_url'] = ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == "on") ? "https" : "http");
-$config['base_url'] .= "://" . $_SERVER['HTTP_HOST'];
+// Force HTTPS in production
+$protocol = 'https';
+if (isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
+    $protocol = $_SERVER['HTTP_X_FORWARDED_PROTO'];
+} elseif (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == "on") {
+    $protocol = 'https';
+} elseif (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) {
+    $protocol = 'https';
+}
+
+$config['base_url'] = $protocol . "://" . $_SERVER['HTTP_HOST'];
 $config['base_url'] .= str_replace(basename($_SERVER['SCRIPT_NAME']), "", $_SERVER['SCRIPT_NAME']);
 
 $config['index_page'] = '';
@@ -52,14 +61,18 @@ $config['sess_cookie_name'] = 'ci_session';
 $config['sess_expiration'] = 0; // 0 = until browser closes
 $config['sess_save_path'] = APPPATH.'cache';
 $config['sess_match_ip'] = FALSE;
+$config['sess_use_database'] = FALSE;
+$config['sess_table_name'] = 'ci_sessions';
+$config['sess_match_fingerprint'] = TRUE;
+$config['sess_encrypt_cookie'] = FALSE;
 $config['sess_time_to_update'] = 1800; // 30 minutes
 $config['sess_regenerate_destroy'] = FALSE;
 
 $config['cookie_prefix']	= '';
 $config['cookie_domain']	= '';
 $config['cookie_path']		= '/';
-$config['cookie_secure']	= FALSE;
-$config['cookie_httponly'] 	= FALSE;
+$config['cookie_secure']	= TRUE;
+$config['cookie_httponly'] 	= TRUE;
 
 $config['standardize_newlines'] = FALSE;
 
