@@ -1,0 +1,58 @@
+/* * custom.css
+ * Styles untuk kustomisasi Header AdminLTE
+*/
+
+/* 1. Mengatur background gradient untuk main-header */
+.main-header.navbar {
+    background-color: #7A85E1; /* Warna fallback jika gradient tidak didukung */
+    background-image: linear-gradient(to right, #7A85E1, #B274E8);
+    border-bottom: none; /* Menghilangkan border bawah default */
+}
+
+/* 2. Mengubah warna semua link & ikon di navbar menjadi putih */
+.main-header .nav-link {
+    color: #ffffff;
+}
+
+.main-header .nav-link:hover {
+    color: rgba(255, 255, 255, 0.85); /* Efek hover agar sedikit transparan */
+}
+
+/* 3. Menata container brand kustom (logo + teks) */
+.custom-brand-container {
+    display: flex;
+    align-items: center;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+/* 4. Menata logo */
+.custom-brand-image {
+    height: 40px; /* Sesuaikan tinggi logo */
+    width: auto;
+    margin-right: 15px; /* Jarak antara logo dan teks */
+    object-fit: contain;
+}
+
+/* 5. Menata wrapper untuk dua baris teks */
+.custom-brand-text-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.1; /* Mengatur jarak antar baris teks */
+}
+
+/* 6. Menata teks utama "APDATE" */
+.custom-brand-text-main {
+    font-size: 1.25rem; /* Ukuran font lebih besar */
+    font-weight: 700; /* Bold */
+    color: #000000;
+}
+
+/* 7. Menata teks sub-judul "SMPIT & MA..." */
+.custom-brand-text-sub {
+    font-size: 0.7rem; /* Ukuran font lebih kecil */
+    font-weight: 400; /* Regular */
+    color: #000000;
+    margin-top: 1px;
+}

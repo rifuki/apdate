@@ -1,0 +1,51 @@
+services:
+  web:
+    image: php:7.4-apache
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_NAME=apdate
+      - DB_USER=root
+      - DB_PASS=rootpass
+    command: >
+      bash -c "
+        docker-php-ext-install pdo pdo_mysql mysqli &&
+        a2enmod rewrite &&
+        chown -R www-data:www-data /var/www/html &&
+        chmod -R 777 /var/www/html/application/logs &&
+        chmod -R 777 /var/www/html/application/cache &&
+        chmod -R 777 /var/www/html/upload &&
+        apache2-foreground
+      "
+
+  db:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: apdate
+      MYSQL_USER: apdate_user
+      MYSQL_PASSWORD: apdate_pass
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./DB_UPDATE.sql:/docker-entrypoint-initdb.d/init.sql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: rootpass
+    depends_on:
+      - db
+
+volumes:
+  mysql_data:
