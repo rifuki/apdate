@@ -50,7 +50,7 @@ $config['encryption_key'] = 'apdatev2';
 $config['sess_driver'] = 'files';
 $config['sess_cookie_name'] = 'ci_session';
 $config['sess_expiration'] = 0; // 0 = until browser closes
-$config['sess_save_path'] = NULL;
+$config['sess_save_path'] = APPPATH.'cache';
 $config['sess_match_ip'] = FALSE;
 $config['sess_time_to_update'] = 1800; // 30 minutes
 $config['sess_regenerate_destroy'] = FALSE;

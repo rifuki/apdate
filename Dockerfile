@@ -40,6 +40,8 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 # Set proper permissions
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html \
+    && mkdir -p /var/www/html/application/logs \
+    && mkdir -p /var/www/html/application/cache \
     && chmod -R 777 /var/www/html/application/logs \
     && chmod -R 777 /var/www/html/application/cache \
     && chmod -R 755 /var/www/html/upload
