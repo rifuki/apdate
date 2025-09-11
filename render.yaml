@@ -1,0 +1,21 @@
+# APDATE - Render.com configuration
+services:
+  - type: web
+    name: apdate
+    env: docker
+    dockerfilePath: ./Dockerfile
+    region: singapore
+    plan: free
+    envVars:
+      - key: DB_HOST
+        value: aws-1-ap-southeast-1.pooler.supabase.com
+      - key: DB_NAME
+        value: postgres
+      - key: DB_USER
+        value: postgres.juesouqruobekqgcfdzz
+      - key: DB_PASS
+        value: MDFbU0R7HDxbWLMt
+      - key: DB_PORT
+        value: 5432
+      - key: CI_ENV
+        value: production

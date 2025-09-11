@@ -1,0 +1,26 @@
+# APDATE - Docker ignore file
+.git
+.github
+*.md
+README.md
+RAILWAY_DEPLOYMENT.md
+SUPABASE_DEPLOYMENT.md
+.env.example
+.env.supabase
+clear_session.php
+init-database.sql
+database.sql
+
+# Development files
+.vscode
+.idea
+*.log
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Dependencies that will be installed in container
+vendor/
+node_modules/
