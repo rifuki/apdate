@@ -11,7 +11,10 @@
 		"source": "https://github.com/bcit-ci/CodeIgniter"
 	},
 	"require": {
-		"php": ">=7.4",
+		"php": "^8.0",
+		"ext-pdo": "*",
+		"ext-pgsql": "*", 
+		"ext-mbstring": "*",
 		"phpoffice/phpspreadsheet": "^1.10",
 		"vlucas/phpdotenv": "^5.4"
 	},
