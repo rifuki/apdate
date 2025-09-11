@@ -7,19 +7,13 @@ WORKDIR /var/www/html
 # Install system dependencies and PHP extensions
 RUN apt-get update && apt-get install -y \
     libpq-dev \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
     libzip-dev \
+    libonig-dev \
     unzip \
-    git \
     curl \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
         pdo \
         pdo_pgsql \
-        pgsql \
-        gd \
         zip \
         mbstring \
     && apt-get clean \
