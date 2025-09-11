@@ -3,9 +3,7 @@
 -- Converted from MySQL to PostgreSQL
 -- --------------------------------------------------------
 
--- Create database
-CREATE DATABASE apdate;
-
+-- Database will be created by POSTGRES_DB environment variable
 -- Connect to the database
 \c apdate;
 

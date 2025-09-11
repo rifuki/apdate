@@ -129,7 +129,7 @@ class Auth extends CI_Controller {
 					"nama"			=> "New User",
 					"uraian"		=> $uraian,
 					"tanggal"		=> date('Y-m-d'),
-					"is_read"		=> 0,
+					"is_read"		=> FALSE,
 				);
 				$notification = $this->Dbhelper->insertData('mt_notifikasi', $notifArray);
 
@@ -158,7 +158,7 @@ class Auth extends CI_Controller {
 					"nama"			=> "Verified New User",
 					"uraian"		=> $uraian,
 					"tanggal"		=> date('Y-m-d'),
-					"is_read"		=> 0,
+					"is_read"		=> FALSE,
 				);
 				$notification = $this->Dbhelper->insertData('mt_notifikasi', $notifArray);
 

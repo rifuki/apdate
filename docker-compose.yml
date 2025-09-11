@@ -1,7 +1,12 @@
+# APDATE Educational Management System
+# One-command setup: docker-compose up -d
+
 services:
   web:
     image: php:8.0-apache
     container_name: apdate_web
+    env_file:
+      - .env
     ports:
       - "8080:80"
     volumes:
@@ -12,21 +17,27 @@ services:
       - DB_USER=${DB_USER:-postgres}
       - DB_PASS=${DB_PASS:-postgres123}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     command: >
       bash -c "
-      apt-get update && 
-      apt-get install -y libpq-dev unzip libpng-dev libjpeg-dev libfreetype6-dev libzip-dev && 
-      docker-php-ext-configure gd --with-freetype --with-jpeg &&
-      docker-php-ext-install pdo pdo_pgsql pgsql gd zip && 
-      a2enmod rewrite && 
-      curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer &&
-      cd /var/www/html && composer install --no-dev --optimize-autoloader --no-interaction || composer update --no-dev --optimize-autoloader --no-interaction || echo 'Composer install failed, continuing...' &&
+      echo '🚀 Starting APDATE Web Server Setup...' &&
+      apt-get update > /dev/null 2>&1 &&
+      apt-get install -y libpq-dev unzip libpng-dev libjpeg-dev libfreetype6-dev libzip-dev > /dev/null 2>&1 &&
+      docker-php-ext-configure gd --with-freetype --with-jpeg > /dev/null 2>&1 &&
+      docker-php-ext-install pdo pdo_pgsql pgsql gd zip > /dev/null 2>&1 &&
+      a2enmod rewrite > /dev/null 2>&1 &&
+      curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer > /dev/null 2>&1 &&
+      cd /var/www/html &&
+      composer install --no-dev --optimize-autoloader --no-interaction > /dev/null 2>&1 || 
+      composer update --no-dev --optimize-autoloader --no-interaction > /dev/null 2>&1 || 
+      echo 'Composer: Using existing vendor/' &&
       find /var/www/html -type d -name .git -prune -o -type f -exec chown www-data:www-data {} + &&
       find /var/www/html -type d -name .git -prune -o -type d -exec chown www-data:www-data {} + &&
       chmod -R 777 /var/www/html/application/logs &&
       chmod -R 777 /var/www/html/application/cache &&
       chmod -R 777 /var/www/html/upload &&
+      echo '✅ APDATE Web Server Ready! Visit: http://localhost:8080' &&
       apache2-foreground
       "
 
@@ -35,14 +46,20 @@ services:
     container_name: apdate_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: apdate
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: ${DB_NAME:-apdate}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASS:-postgres123}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./init-database.sql:/docker-entrypoint-initdb.d/02-setup.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-apdate}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   pgadmin:
     image: dpage/pgadmin4

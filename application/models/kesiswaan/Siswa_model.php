@@ -15,6 +15,8 @@
 	        $this->db->from($this->table);
 	        $this->db->join('mt_periode', $this->table.'.join_periode_id = mt_periode.id');
 	        $this->db->join('tref_kelas', $this->table.'.current_kelas_id = tref_kelas.id', 'left');
+	        // Filter out soft deleted records
+	        $this->db->where($this->table.'.deleted_at IS NULL');
 	        $i = 0;  
 	        foreach ($this->column_search as $item) {
 	            if(isset($_POST['search']['value']) && !empty($_POST['search']['value'])) {

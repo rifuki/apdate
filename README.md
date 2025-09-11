@@ -2,25 +2,38 @@
 
 Educational management system built with CodeIgniter 3.1.5 + AdminLTE template, featuring multi-role support (Admin/Guru/Siswa).
 
-## 🚀 Quick Start with Docker
+## 🚀 Quick Start - One Command Setup
 
 ### Prerequisites
 - Docker & Docker Compose installed
 
-### Run Application
+### Ready-to-Use Setup
 ```bash
+# Clone and start - THAT'S IT!
 docker-compose up -d
+
+# Wait ~2-3 minutes for complete setup, then open:
+# 🌐 http://localhost:8080/login_dashboard
 ```
 
-### Access URLs
+### 🎯 Automatic Setup Includes:
+- ✅ **Full PostgreSQL database** with all tables & data
+- ✅ **All 20 admin menus** automatically configured  
+- ✅ **Production-ready admin user** (no manual fixes needed)
+- ✅ **All PHP extensions** (PostgreSQL, GD, ZIP, etc.)
+- ✅ **Composer dependencies** installed
+- ✅ **Proper file permissions** set
+
+### 🔗 Access URLs  
 - **Application**: http://localhost:8080
+- **Admin Login**: http://localhost:8080/login_dashboard
 - **pgAdmin**: http://localhost:8081
 - **PostgreSQL**: localhost:5432
 
-### Default Login
-- **Admin**: http://localhost:8080/login_dashboard (admin / admin123)
-- **pgAdmin**: http://localhost:8081 (admin@admin.com / admin123)  
-- **Database**: apdate (postgres / postgres123)
+### 🔑 Default Login
+- **Admin User**: `admin` / `admin123` (Full access to all 20 menus)
+- **pgAdmin**: `admin@admin.com` / `admin123`  
+- **Database**: `apdate` (`postgres` / `postgres123`)
 
 ## 🏗️ Architecture
 - **Backend**: PHP 8.0 + CodeIgniter 3.1.5
