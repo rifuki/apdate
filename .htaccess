@@ -2,9 +2,10 @@
 <IfModule mod_rewrite.c>
 RewriteEngine On
 
-# Force HTTPS in production
+# Force HTTPS in production only (skip for development)
 RewriteCond %{HTTP:X-Forwarded-Proto} !https
 RewriteCond %{HTTPS} off
+RewriteCond %{HTTP_HOST} !^localhost [NC]
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 # Remove index.php

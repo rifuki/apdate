@@ -6,7 +6,7 @@ services:
     image: php:8.0-apache
     container_name: apdate_web
     env_file:
-      - .env
+      - .env.local
     ports:
       - "8080:80"
     volumes:

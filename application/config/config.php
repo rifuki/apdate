@@ -1,14 +1,16 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-// Force HTTPS in production
-$protocol = 'https';
+// Auto-detect protocol based on environment
+$protocol = 'http'; // Default for development
 if (isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
     $protocol = $_SERVER['HTTP_X_FORWARDED_PROTO'];
 } elseif (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == "on") {
     $protocol = 'https';
 } elseif (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) {
     $protocol = 'https';
+} elseif (getenv('CI_ENV') === 'production') {
+    $protocol = 'https'; // Force HTTPS in production only
 }
 
 $config['base_url'] = $protocol . "://" . $_SERVER['HTTP_HOST'];
@@ -71,7 +73,7 @@ $config['sess_regenerate_destroy'] = FALSE;
 $config['cookie_prefix']	= '';
 $config['cookie_domain']	= '';
 $config['cookie_path']		= '/';
-$config['cookie_secure']	= TRUE;
+$config['cookie_secure']	= (getenv('CI_ENV') === 'production');
 $config['cookie_httponly'] 	= TRUE;
 
 $config['standardize_newlines'] = FALSE;
