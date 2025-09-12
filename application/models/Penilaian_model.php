@@ -51,7 +51,7 @@
 						a.*,
 						b.nisn,
 						b.nama,
-						COALESCE(d.nilai, 0) AS nilai,
+						COALESCE(d.nilai, '0') AS nilai,
 						d.is_final
 				FROM 
 						tref_kelas_siswa AS a
