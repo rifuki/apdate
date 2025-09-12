@@ -108,8 +108,9 @@ class Kelas extends CI_Controller {
 		$data['action']			= "do_create";
 
 		$tingkat_kelas 	= $this->Dbhelper->selectTabel('id, code, name', 'mt_tingkat_kelas', array(), 'code',' ASC');
-		$periode 				= $this->Dbhelper->selectTabelOne('id, tahun_ajaran', 'mt_periode', array("is_active" => TRUE));
-		$guru 					= $this->Dbhelper->selectTabel('id, nip, nama', 'mt_users_guru', array('is_active' => TRUE), 'nip',' ASC');
+		// Fix: Convert boolean to string for PostgreSQL compatibility
+		$periode 				= $this->Dbhelper->selectTabelOne('id, tahun_ajaran', 'mt_periode', array("is_active" => '1'));
+		$guru 					= $this->Dbhelper->selectTabel('id, nip, nama', 'mt_users_guru', array('is_active' => '1'), 'nip',' ASC');
 		$data['tingkat_kelas']	= $tingkat_kelas;
 		$data['periode']	= $periode;
 		$data['guru']	= $guru;
@@ -126,9 +127,10 @@ class Kelas extends CI_Controller {
 			return redirect($this->own_link);
 		}
 		$tingkat_kelas = $this->Dbhelper->selectTabel('id, code, name', 'mt_tingkat_kelas', array("deleted_at" => NULL), 'code', 'ASC');	
-		$mata_pelajaran = $this->Dbhelper->selectTabel('id, code, name', 'mt_mata_pelajaran', array("is_active" => TRUE), 'code', 'ASC');
+		// Fix: Convert boolean to string for PostgreSQL compatibility
+		$mata_pelajaran = $this->Dbhelper->selectTabel('id, code, name', 'mt_mata_pelajaran', array("is_active" => '1'), 'code', 'ASC');
 		$periode 				= $this->Dbhelper->selectTabelOne('id, tahun_ajaran', 'mt_periode', array("id" => $model->periode_id));
-		$guru 					= $this->Dbhelper->selectTabel('id, nip, nama', 'mt_users_guru', array('is_active' => TRUE), 'nip',' ASC');
+		$guru 					= $this->Dbhelper->selectTabel('id, nip, nama', 'mt_users_guru', array('is_active' => '1'), 'nip',' ASC');
 		$model_mapel = $this->Kelas_model->find_mapel($id, true);
 		$data['judul'] 			= $this->judul;
 		$data['subjudul'] 		= 'Edit Data';

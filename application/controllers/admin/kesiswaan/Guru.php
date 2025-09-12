@@ -77,7 +77,8 @@ class Guru extends CI_Controller {
 
 	public function create() {
 		$this->privilege('is_create');
-		$periode = $this->Dbhelper->selectTabelOne('id, tahun_ajaran', 'mt_periode', array("is_active" => TRUE));
+		// Fix: Convert boolean to string for PostgreSQL compatibility
+		$periode = $this->Dbhelper->selectTabelOne('id, tahun_ajaran', 'mt_periode', array("is_active" => '1'));
 
 		$data['judul'] 		= $this->judul;
 		$data['subjudul'] = 'Create Data';
@@ -100,7 +101,8 @@ class Guru extends CI_Controller {
 
 		$model_mapel = $this->Guru_model->find_mapel($id, true);
 		$periode = $this->Dbhelper->selectTabelOne('id, tahun_ajaran', 'mt_periode', array("id" => $model->join_periode_id));
-		$mata_pelajaran = $this->Dbhelper->selectTabel('id, code, name', 'mt_mata_pelajaran', array("is_active" => TRUE), 'code', 'ASC');
+		// Fix: Convert boolean to string for PostgreSQL compatibility
+		$mata_pelajaran = $this->Dbhelper->selectTabel('id, code, name', 'mt_mata_pelajaran', array("is_active" => '1'), 'code', 'ASC');
 		$data['judul'] 			= $this->judul;
 		$data['subjudul'] 		= 'Edit Data';
 		$data['own_link'] 		= $this->own_link;

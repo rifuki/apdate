@@ -156,7 +156,8 @@
 		$CI->db->from("mt_periode_semester as a");
 		$CI->db->join("mt_periode as b", "a.periode_id = b.id");
 		$CI->db->join("mt_status_periode as c", "a.status = c.code", "left");
-		$CI->db->where('a.is_active', TRUE);
+		// Fix: Convert boolean to integer for PostgreSQL compatibility
+		$CI->db->where('a.is_active', 1);
 		$data = $CI->db->get()->row_array();
 		return $data;
 	}
@@ -191,7 +192,9 @@
 
 		$user_access = $session['user_access'];
 		$CI->db->select("id, name, routes, icon");
-		$CI->db->where('is_config', $is_config);
+		// Fix: Convert boolean to integer for PostgreSQL compatibility
+		$is_config_value = $is_config ? 1 : 0;
+		$CI->db->where('is_config', $is_config_value);
 		$CI->db->where('menu_parent_id', 0);
 		if (!empty($user_access)) {
 			$CI->db->where_in("id", $user_access);

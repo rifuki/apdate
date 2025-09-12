@@ -96,7 +96,8 @@
 
 		public function find_active_periode() {
 			$this->db->from('mt_periode');
-			$this->db->where('is_active', TRUE);
+			// Fix: Convert boolean to string for PostgreSQL compatibility
+			$this->db->where('is_active', '1');
 			$query = $this->db->get();
 
 			return $query->row();

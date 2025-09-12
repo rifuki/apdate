@@ -77,7 +77,8 @@ class Siswa extends CI_Controller {
 
 	public function create() {
 		$this->privilege('is_create');
-		$periode = $this->Dbhelper->selectTabelOne('id, tahun_ajaran', 'mt_periode', array("is_active" => TRUE));
+		// Fix: Convert boolean to string for PostgreSQL compatibility  
+		$periode = $this->Dbhelper->selectTabelOne('id, tahun_ajaran', 'mt_periode', array("is_active" => '1'));
 
 		$data['judul'] 		= $this->judul;
 		$data['subjudul'] = 'Create Data';
