@@ -209,6 +209,13 @@ class Laporan extends CI_Controller {
 					$nilai = isset($rows[$i][2]) && $rows[$i][2] !== null && $rows[$i][2] !== '' ? $rows[$i][2] : null; // Kolom C - Nilai Tugas
 
 					if ($pertemuan_id && $nilai !== null) {
+						// Get pertemuan data to fetch jadwal_kelas_id
+						$pertemuan = $this->Lms_model->find_pertemuan_byid($pertemuan_id);
+						if (empty($pertemuan)) {
+							$error_count++;
+							continue;
+						}
+
 						// Cek apakah record sudah ada
 						$existing = $this->db->where('siswa_id', $siswa_id)
 										   ->where('pertemuan_id', $pertemuan_id)
@@ -228,10 +235,11 @@ class Laporan extends CI_Controller {
 								$error_count++;
 							}
 						} else {
-							// Insert new record
+							// Insert new record with jadwal_kelas_id
 							$insert = $this->db->insert('tref_pertemuan_tugas', [
 								'siswa_id' => $siswa_id,
 								'pertemuan_id' => $pertemuan_id,
+								'jadwal_kelas_id' => $pertemuan['jadwal_kelas_id'],
 								'nilai' => $nilai,
 								'created_at' => date('Y-m-d H:i:s'),
 								'updated_at' => date('Y-m-d H:i:s')
