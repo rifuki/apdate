@@ -1,0 +1,5 @@
+Order deny,allow
+Deny from all
+<Files ~ "\.(xlsx|xls|csv)$">
+    Allow from all
+</Files>

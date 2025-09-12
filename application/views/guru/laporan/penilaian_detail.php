@@ -1,4 +1,4 @@
-<form id="frm-action" method="POST" action="<?= base_url('guru/laporan-penilaian/detail_export') ?>" enctype="multipart/form-data">
+<form id="frm-action" method="POST" action="<?= base_url('guru/laporan/penilaian_detail_excel') ?>" enctype="multipart/form-data">
     <input type="hidden" name="jadwal_id" value="<?= $jadwal_id ?>">
     <input type="hidden" name="siswa_id" value="<?= $siswa_id ?>">
     <div class="form-group mb-5 row">
@@ -11,7 +11,7 @@
         </div>
         <div class="col-lg-12 col-sm-12">
             <br>
-            <button type="submit" class="form-control btn btn-danger" formaction="<?= base_url('guru/laporan-penilaian/detail_import') ?>">Import Nilai</button>
+            <button type="submit" class="form-control btn btn-danger" formaction="<?= base_url('guru/laporan/penilaian_detail_import') ?>">Import Nilai</button>
         </div>
     </div>
 </form>

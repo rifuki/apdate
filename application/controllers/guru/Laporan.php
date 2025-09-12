@@ -161,46 +161,111 @@ class Laporan extends CI_Controller {
 	}
 	public function penilaian_detail_import()
 	{
-		// Pastikan file diupload
-		if (empty($_FILES['file']['name'])) {
-			show_error('File Excel tidak ditemukan.');
-		}
-
-		// Load library PhpSpreadsheet
-		$this->load->library('upload');
-		$config['upload_path']   = './upload/';
-		$config['allowed_types'] = 'xlsx|xls';
-		$config['max_size']      = 2048;
-		$this->upload->initialize($config);
-
-		if (!$this->upload->do_upload('file')) {
-			show_error($this->upload->display_errors());
-		}
-
-		$fileData = $this->upload->data();
-		$filePath = $fileData['full_path'];
-
-		// Baca file Excel
-		$spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filePath);
-		$sheet = $spreadsheet->getActiveSheet();
-		$rows = $sheet->toArray();
-
-		// Mulai dari baris ke-2 (baris pertama header)
-		for ($i = 1; $i < count($rows); $i++) {
-			$id = isset($rows[$i][0]) ? $rows[$i][0] : null; // Kolom A
-			$nilai = isset($rows[$i][2]) && $rows[$i][2] !== null && $rows[$i][2] !== '' ? $rows[$i][2] : 40; // Kolom C
-
-			if ($id) {
-				$this->db->where('id', $id)->update('tref_pertemuan_tugas', ['nilai' => $nilai]);
+		if ($this->input->server('REQUEST_METHOD') === 'POST') {
+			// Pastikan file diupload
+			if (empty($_FILES['file']['name'])) {
+				$this->session->set_flashdata('error', 'File Excel tidak ditemukan.');
+				redirect('guru/laporan/penilaian');
 			}
+
+			$jadwal_id = $this->input->post('jadwal_id');
+			$siswa_id = $this->input->post('siswa_id');
+
+			if (empty($jadwal_id) || empty($siswa_id)) {
+				$this->session->set_flashdata('error', 'Jadwal atau Siswa tidak ditemukan.');
+				redirect('guru/laporan/penilaian');
+			}
+
+			// Load library PhpSpreadsheet
+			$this->load->library('upload');
+			$config['upload_path']   = './upload/';
+			$config['allowed_types'] = 'xlsx|xls';
+			$config['max_size']      = 2048;
+			$config['file_name']     = 'import_nilai_' . time();
+			$this->upload->initialize($config);
+
+			if (!$this->upload->do_upload('file')) {
+				$this->session->set_flashdata('error', $this->upload->display_errors());
+				redirect('guru/laporan/penilaian');
+			}
+
+			$fileData = $this->upload->data();
+			$filePath = $fileData['full_path'];
+
+			try {
+				// Baca file Excel
+				$spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($filePath);
+				$sheet = $spreadsheet->getActiveSheet();
+				$rows = $sheet->toArray();
+
+				$this->db->trans_begin();
+				$success_count = 0;
+				$error_count = 0;
+
+				// Mulai dari baris ke-2 (baris pertama header)
+				for ($i = 1; $i < count($rows); $i++) {
+					$pertemuan_id = isset($rows[$i][0]) ? (int)$rows[$i][0] : null; // Kolom A - Pertemuan ID
+					$pertemuan_ke = isset($rows[$i][1]) ? $rows[$i][1] : ''; // Kolom B - Pertemuan Ke (info only)
+					$nilai = isset($rows[$i][2]) && $rows[$i][2] !== null && $rows[$i][2] !== '' ? $rows[$i][2] : null; // Kolom C - Nilai Tugas
+
+					if ($pertemuan_id && $nilai !== null) {
+						// Cek apakah record sudah ada
+						$existing = $this->db->where('siswa_id', $siswa_id)
+										   ->where('pertemuan_id', $pertemuan_id)
+										   ->get('tref_pertemuan_tugas')->row_array();
+
+						if ($existing) {
+							// Update existing record
+							$update = $this->db->where('siswa_id', $siswa_id)
+											   ->where('pertemuan_id', $pertemuan_id)
+											   ->update('tref_pertemuan_tugas', [
+												   'nilai' => $nilai,
+												   'updated_at' => date('Y-m-d H:i:s')
+											   ]);
+							if ($update) {
+								$success_count++;
+							} else {
+								$error_count++;
+							}
+						} else {
+							// Insert new record
+							$insert = $this->db->insert('tref_pertemuan_tugas', [
+								'siswa_id' => $siswa_id,
+								'pertemuan_id' => $pertemuan_id,
+								'nilai' => $nilai,
+								'created_at' => date('Y-m-d H:i:s'),
+								'updated_at' => date('Y-m-d H:i:s')
+							]);
+							if ($insert) {
+								$success_count++;
+							} else {
+								$error_count++;
+							}
+						}
+					}
+				}
+
+				if ($error_count > 0) {
+					$this->db->trans_rollback();
+					$this->session->set_flashdata('error', "Import gagal. $error_count data error.");
+				} else {
+					$this->db->trans_commit();
+					$this->session->set_flashdata('success', "Import berhasil. $success_count nilai berhasil diimport.");
+				}
+
+			} catch (Exception $e) {
+				$this->db->trans_rollback();
+				$this->session->set_flashdata('error', 'Terjadi kesalahan saat membaca file: ' . $e->getMessage());
+			}
+
+			// Hapus file setelah import
+			@unlink($filePath);
+
+			// Redirect ke halaman sebelumnya
+			redirect('guru/laporan/penilaian');
 		}
 
-		// Hapus file setelah import
-		@unlink($filePath);
-
-		// Redirect atau tampilkan pesan sukses
-		$this->session->set_flashdata('success', 'Import nilai berhasil.');
-		redirect('guru/laporan/penilaian');
+		badrequest('Method not allowed');
 	}
 
 	public function egrading() {
