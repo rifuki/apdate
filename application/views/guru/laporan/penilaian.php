@@ -11,7 +11,7 @@
         <h3 class="card-title">Data <?php echo $judul ?></h3>
       </div>
       <div class="card-body">
-        <form id="frm-filter" action="<?= base_url('guru/laporan-penilaian') ?>" method="POST">
+        <form id="frm-filter" action="<?= base_url('guru/laporan/penilaian') ?>" method="POST">
           <div class="form-group row">
             <label for="periode_data" class="col-lg-2 col-sm-12 col-form-label">Periode Aktif</label>
             <div class="col-lg-6 col-sm-12">
@@ -114,7 +114,7 @@
 
 <script type="text/javascript">
   function cekDetail(siswa_id, jadwal_id) {
-    var url = "<?= base_url('guru/laporan-penilaian/detail') ?>";
+    var url = "<?= base_url('guru/laporan/penilaian_detail') ?>";
     $("#rowSiswa").removeClass('col-md-6');
     $("#rowSiswa").addClass('col-md-12');
     $("#rowDetail").empty();
@@ -219,7 +219,7 @@
       formData.append(`absensi[${siswa_id}_${pertemuan_id}]`, status_kehadiran);
     });
 
-    fetch("<?= base_url('guru/laporan-penilaian/do_penilaian') ?>", {
+    fetch("<?= base_url('guru/laporan/do_penilaian') ?>", {
         method: 'POST',
         body: formData
     })
