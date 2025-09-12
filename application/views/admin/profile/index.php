@@ -6,7 +6,7 @@
       </div>
       <div class="card-body">
         <form action="<?php echo $own_link ?>/update" method="POST" enctype="multipart/form-data">
-          <input type="hidden" name="id" value="<?php echo isset($model)?$model->id_pegawai:""; ?>">
+          <input type="hidden" name="id" value="<?php echo isset($model)?$model->id:""; ?>">
           <div class="form-group row">
             <label for="inputEmail3" class="col-lg-2 col-sm-12 col-form-label">Name</label>
             <div class="col-lg-10 col-sm-12">
@@ -14,21 +14,15 @@
             </div>
           </div>
           <div class="form-group row">
-            <label for="inputEmail3" class="col-lg-2 col-sm-12 col-form-label">NIP</label>
+            <label for="inputEmail3" class="col-lg-2 col-sm-12 col-form-label">Username</label>
             <div class="col-lg-10 col-sm-12">
-              <input type="text" name="nip" class="form-control" autocomplete="off" value="<?php echo isset($model)?$model->nip:""; ?>" required>
+              <input type="text" name="username" class="form-control" autocomplete="off" value="<?php echo isset($model)?$model->username:""; ?>" required>
             </div>
           </div>
           <div class="form-group row">
-            <label for="inputEmail3" class="col-lg-2 col-sm-12 col-form-label">Phone Number</label>
+            <label for="inputEmail3" class="col-lg-2 col-sm-12 col-form-label">Email</label>
             <div class="col-lg-10 col-sm-12">
-              <input type="text" name="phone" onkeypress="javascript:return isNumber(event)" class="form-control" autocomplete="off" value="<?php echo isset($model)?$model->phone:""; ?>" required>
-            </div>
-          </div>
-          <div class="form-group row">
-            <label for="inputEmail3" class="col-lg-2 col-sm-12 col-form-label">Address</label>
-            <div class="col-lg-10 col-sm-12">
-              <textarea class="form-control" name="address"><?php echo isset($model)?$model->address:""; ?></textarea>
+              <input type="email" name="email" class="form-control" autocomplete="off" value="<?php echo isset($model)?$model->email:""; ?>">
             </div>
           </div>
           <hr>
