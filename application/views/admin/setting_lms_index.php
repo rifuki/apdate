@@ -11,6 +11,22 @@
         <h3 class="card-title">Data <?php echo $subjudul ?></h3>
       </div>
       <div class="card-body">
+        <br>
+        <form id="frm-aspirasi">
+          <div class="form-group row">
+            <label for="periode_data" class="col-lg-2 col-sm-12 col-form-label">Menu Aspirasi</label>
+            <div class="col-lg-6 col-sm-12">
+              <select name="aspirasi_status" class="form-control">
+                <option value="open" <?= $setting[3]['value'] == 'open' ? 'selected' : '' ?>>Open</option>
+                <option value="close" <?= $setting[3]['value'] == 'close' ? 'selected' : '' ?>>Close</option>
+              </select>
+            </div>
+          </div>
+          <div class="mb-2">
+            <button type="button" onclick="simpanPerubahanAspirasi()" class="btn btn-info btn-flat">Update</button>
+          </div>
+        </form>
+        <br>
         <div class="row">
           <div class="col-md-12">
             <strong>Filter Kalimat</strong>
@@ -81,6 +97,32 @@
 </div>
 
 <script type="text/javascript">
+  function simpanPerubahanAspirasi() {
+    var form = document.getElementById('frm-aspirasi');
+    
+    var formData = new FormData(form);
+    formData.append('type', 'aspirasi');
+    
+    fetch("<?= base_url('dashboard/setting-lms/do_update') ?>", {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+        return toastSuccess(data.message);
+      }
+      return toastError(data.message);
+    })
+    .catch(error => {
+      console.error('Gagal:', error);
+      return toastError('Gagal menyimpan perubahan!');
+    });
+  }
+  
   function simpanPerubahanAbsensi() {
     var form = document.getElementById('frm-absensi-diskusi');
     

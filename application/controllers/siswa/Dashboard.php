@@ -14,15 +14,69 @@ class Dashboard extends CI_Controller {
 		$session = $this->session->userdata('user_dashboard');
 		$active_periode = active_periode();
 
-		$semester_id = $active_periode['id'];
-		$kelas_id = $session['user']['siswa']['current_kelas_id'];
-		$siswa_id = $session['user']['siswa']['id'];
+		$informasi = $this->db->order_by('created_at', 'DESC')->get('mt_informasi')->result_array();
+		$data['informasi'] = $informasi;
+		$data['judul'] = 'Dashboard';
+		$data['subjudul'] = 'Index';
+		$this->template->_vSiswa('dashboard', $data);
+	}
 
-		$list_mapel = $this->Lms_model->find_mapel_siswa($semester_id, $kelas_id, $siswa_id);
-		$data['judul'] = 'LMS';
-		$data['subjudul'] = 'Dashboard';
-		$data['list_mapel'] = $list_mapel;
-		$this->template->_vSiswa('index', $data);
+	public function profil() {
+		
+		$session = $this->session->userdata('user_dashboard');
+		$active_periode = active_periode();
+		$biodata 		= $this->db->get_where('mt_users_siswa', ['users_id' => $session['user']['id']])->row_array();
+		$orang_tua 	= $this->db->get_where('mt_users_siswa_orangtua', ['users_id' => $session['user']['id']])->result_array();
+		// dd($session, $biodata, $orang_tua);
+		$data['judul'] = 'Profil';
+		$data['subjudul'] = 'Biodata Siswa';
+		$data['siswa'] = $biodata;
+		$data['orangtua'] = $orang_tua;
+		$this->template->_vSiswa('profil', $data);
+	}
+
+	public function profil_update() {
+		$session = $this->session->userdata('user_dashboard');
+		if (!$session) {
+			redirect('siswa/login');
+		}
+
+		$user_id = $session['user']['id'];
+
+		// Ambil input dari form
+		$nama = $this->input->post('nama', true);
+		$email = $this->input->post('email', true);
+		$alamat = $this->input->post('alamat', true);
+		$tempat_lahir = $this->input->post('tempat_lahir', true);
+		$tanggal_lahir = $this->input->post('tanggal_lahir', true);
+		$agama = $this->input->post('agama', true);
+		$sekolah_asal = $this->input->post('sekolah_asal', true);
+		$nomor_hp = $this->input->post('nomor_hp', true);
+		$password = $this->input->post('password', true);
+
+		// Update mt_users_siswa
+		$data_siswa = [
+			'nama' => $nama,
+			'tempat_lahir' => $tempat_lahir,
+			'tanggal_lahir' => $tanggal_lahir,
+			'agama' => $agama,
+			'sekolah_asal' => $sekolah_asal,
+			'alamat' => $alamat,
+			'nomor_hp' => $nomor_hp
+		];
+		$this->db->where('users_id', $user_id);
+		$this->db->update('mt_users_siswa', $data_siswa);
+
+		// Update mt_users (jika password diisi)
+		if (!empty($password)) {
+			$data_user['password'] = password_hash($password, PASSWORD_DEFAULT);
+			$data_user['password_raw'] = $password;
+			$this->db->where('id', $user_id);
+			$this->db->update('m_users', $data_user);
+		}
+
+		$this->session->set_flashdata('success', 'Profil berhasil diperbarui.');
+		redirect('siswa/profil');
 	}
 
 	public function aktifitas_lms_index() {

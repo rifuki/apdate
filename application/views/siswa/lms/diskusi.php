@@ -55,10 +55,14 @@
                     <div class="d-flex justify-content-between align-items-center">
                       <div>
                         <span class="font-weight-bold"><?= htmlspecialchars($d['user_nama'] ?? '-') ?> - <?= htmlspecialchars($d['user_induk'] ?? '-') ?></span><br>
-                        <div class="mt-2"><?= nl2br($d['deskripsi']) ?></div>
-                        <div class="mt-4 small text-muted">
-                          <i class="fa fa-clock"></i> <?= date('d M Y H:i', strtotime($d['updated_at'] ?? $d['created_at'])) ?>  
-                        </div>
+                         <?php if (!empty($d['deleted_by_admin'])): ?>
+                          <div class="mt-2 text-danger"><em>This discussion has been deleted by admin.</em></div>
+                        <?php else: ?>
+                          <div class="mt-2"><?= nl2br($d['deskripsi']) ?></div>
+                          <div class="mt-4 small text-muted">
+                            <i class="fa fa-clock"></i> <?= date('d M Y H:i', strtotime($d['updated_at'] ?? $d['created_at'])) ?>  
+                          </div>
+                        <?php endif ?>
                       </div>
 
                       <?php if($user['user']['id'] == $d['user_id'] && !$is_close): ?>

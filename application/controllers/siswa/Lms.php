@@ -1,4 +1,4 @@
-<?php
+	<?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Lms extends CI_Controller {
@@ -211,20 +211,28 @@ class Lms extends CI_Controller {
 				'updated_at' 		=> $now,
 			];
 			// Proses upload file jika ada
-			if (isset($_FILES['file']) && $_FILES['file']['error'] == 0) {
-					$uploadDir = FCPATH . 'upload/tugas/';
-					if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+			if (isset($_FILES['file'])) {
+				if ($_FILES['file']['error'] != 0) {
+					error('Upload file gagal, silahkan cek kembali file Anda');
+				}
 
-					$ext = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
-					$fileName = 'tugas_' . $pertemuan_id . '_' . $siswa_id . '_' . time() . '.' . $ext;
-					$filePath = $uploadDir . $fileName;
+				$byte = 1024;
+				$max_size = 1536 * $byte;
+				if ($_FILES['file']['size'] > $max_size) {
+					error('Ukuran file melebihi batas maksimum 1.5MB.');
+				}
 
-					if (move_uploaded_file($_FILES['file']['tmp_name'], $filePath)) {
-							$file_path = 'upload/tugas/' . $fileName;
-							$data['file'] = $file_path;
-					} else {
-							error('Gagal upload file tugas');
-					}
+				$uploadDir = FCPATH . 'upload/tugas/';
+				if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+				$ext = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
+				$fileName = 'tugas_' . $pertemuan_id . '_' . $siswa_id . '_' . time() . '.' . $ext;
+				$filePath = $uploadDir . $fileName;
+				if (move_uploaded_file($_FILES['file']['tmp_name'], $filePath)) {
+						$file_path = 'upload/tugas/' . $fileName;
+						$data['file'] = $file_path;
+				} else {
+						error('Gagal upload file tugas');
+				}
 			}
 
 			$cek_tugas = $this->Lms_model->find_tugas_by_siswa_id($pertemuan_id, $siswa_id);

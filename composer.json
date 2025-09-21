@@ -11,14 +11,8 @@
 		"source": "https://github.com/bcit-ci/CodeIgniter"
 	},
 	"require": {
-		"php": "^8.0",
-		"ext-pdo": "*",
-		"ext-pgsql": "*", 
-		"ext-gd": "*",
-		"ext-zip": "*",
-		"ext-mbstring": "*",
-		"phpoffice/phpspreadsheet": "^1.21",
-		"vlucas/phpdotenv": "^5.4"
+		"php": ">=5.3.7",
+		"phpoffice/phpspreadsheet": "^1.10"
 	},
 	"suggest": {
 		"paragonie/random_compat": "Provides better randomness in PHP 5.x"

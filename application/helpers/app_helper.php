@@ -152,12 +152,22 @@
 
 	function active_periode() {
 		$CI =& get_instance();
-		$CI->db->select("a.*, b.tahun_ajaran, c.title as status_periode");
+		$CI->db->select("a.*, b.tahun_ajaran, c.code as status_code, c.title as status_periode");
 		$CI->db->from("mt_periode_semester as a");
 		$CI->db->join("mt_periode as b", "a.periode_id = b.id");
 		$CI->db->join("mt_status_periode as c", "a.status = c.code", "left");
-		// Fix: Convert boolean to integer for PostgreSQL compatibility
 		$CI->db->where('a.is_active', 1);
+		$data = $CI->db->get()->row_array();
+		return $data;
+	}
+
+	function data_periode($where) {
+		$CI =& get_instance();
+		$CI->db->select("a.*, b.tahun_ajaran, c.code as status_code, c.title as status_periode");
+		$CI->db->from("mt_periode_semester as a");
+		$CI->db->join("mt_periode as b", "a.periode_id = b.id");
+		$CI->db->join("mt_status_periode as c", "a.status = c.code", "left");
+		$CI->db->where($where);
 		$data = $CI->db->get()->row_array();
 		return $data;
 	}
@@ -187,18 +197,15 @@
 		return $query->row_array();
 	}
 
-	function menu_data($session, $is_config = FALSE) {
+	function menu_data($session, $is_config = 0) {
 		$CI =& get_instance();
 
-		$user_access = $session['user_access'];
+		$user_access = [];
 		$CI->db->select("id, name, routes, icon");
-		// Fix: Convert boolean to integer for PostgreSQL compatibility
-		$is_config_value = $is_config ? 1 : 0;
-		$CI->db->where('is_config', $is_config_value);
+		$CI->db->where('is_config', $is_config);
 		$CI->db->where('menu_parent_id', 0);
-		if (!empty($user_access)) {
-			$CI->db->where_in("id", $user_access);
-		}
+		// $CI->db->where_in("id", $user_access);
+		$CI->db->where('deleted_at IS NULL');
 		$CI->db->order_by("precedence", "ASC");
 		$data = $CI->db->get('m_menu')->result_array();
 		
@@ -249,7 +256,8 @@
 
 		$CI->db->select("name, routes, icon");
 		$CI->db->where('menu_parent_id', $menu_parent_id);
-		$CI->db->where_in("id", $user_access);
+		// $CI->db->where_in("id", $user_access);
+		$CI->db->where('deleted_at IS NULL');
 		$CI->db->order_by("precedence", "ASC");
 		$data = $CI->db->get('m_menu')->result_array();
 
@@ -270,6 +278,17 @@
 	function setting_lms($where = []) {
 		$CI =& get_instance();
 		$CI->db->from('mt_setting_lms');
+		if ($where) {
+			$CI->db->where($where);
+		}
+		$query = $CI->db->get();
+		return !empty($where) ? $query->row_array() : $query->result_array();
+	}
+
+	function mata_pelajaran($where = [], $column = "*") {
+		$CI =& get_instance();
+		$CI->db->select($column);
+		$CI->db->from('mt_mata_pelajaran');
 		if ($where) {
 			$CI->db->where($where);
 		}

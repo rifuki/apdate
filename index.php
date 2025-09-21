@@ -1,18 +1,5 @@
 <?php
 date_default_timezone_set('Asia/Jakarta');
-
-// Load Composer autoloader
-if (file_exists(__DIR__ . '/vendor/autoload.php')) {
-    require_once __DIR__ . '/vendor/autoload.php';
-    
-    // Load dotenv if available
-    if (class_exists('Dotenv\Dotenv')) {
-        $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
-        if (file_exists(__DIR__ . '/.env')) {
-            $dotenv->load();
-        }
-    }
-}
 /**
  * CodeIgniter
  *

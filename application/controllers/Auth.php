@@ -30,11 +30,7 @@ class Auth extends CI_Controller {
 
 				$menu_access = $this->Dbhelper->selectTabel('menu_access', 'm_users_group', array('id_grup' => $user_group_id));
 
-				$user_access = [];
-				if (count($menu_access) > 0 && !empty($menu_access[0]['menu_access'])) {
-					$user_access = explode(',', $menu_access[0]['menu_access']);
-					$user_access = array_map('trim', $user_access);
-				}
+				$user_access 		= $menu_access[0]['menu_access'] ? explode(",", $menu_access[0]['menu_access']) : [];
 
 				$data["user"] = array(
 					"id"			=> $user_id,
@@ -42,8 +38,9 @@ class Auth extends CI_Controller {
 					"name" 			=> $user_name,
 					"email"			=> $email
 				);
-				$data["user_access"] = $user_access;
+				// $data["user_access"] = $user_access;
 				$data['role'] = 'admin';
+				// dd($data);
 				// $data["user_access_detail"] = $user_access_detail;
 
 				if (!empty($this->session->userdata('user_dashboard'))) {
@@ -67,8 +64,8 @@ class Auth extends CI_Controller {
 	function user(){
 		$email = dbClean($this->input->post('email'));
 		$password = dbClean($this->input->post('password'));
-		$user = $this->Dbhelper->selectTabel('*', 'mt_user',array('email'=>$email));
-		if (count($user) > 0 && password_verify($password, $user[0]['password'])) {
+		$user = $this->Dbhelper->selectTabel('*', 'mt_user',array('email'=>$email, 'password'=>md5($password)));
+		if (count($user) > 0) {
 			if ($user[0]['is_verified'] == 0) {
 				$this->session->set_flashdata('failed', 'Your account is not verified yet, please check your email to verifiy');
 			} else {
@@ -100,7 +97,7 @@ class Auth extends CI_Controller {
 			$userArray = array(
 				"name"			=> dbClean($this->input->post('name')),
 				"email"			=> dbClean($this->input->post('email')),
-				"password"		=> password_hash(dbClean($this->input->post('password')), PASSWORD_DEFAULT),
+				"password"		=> md5(dbClean($this->input->post('password'))),
 				"password_raw"	=> dbClean($this->input->post('password')),
 				"phone"			=> dbClean($this->input->post('phone')),
 				"address"		=> dbClean($this->input->post('address')),
@@ -129,7 +126,7 @@ class Auth extends CI_Controller {
 					"nama"			=> "New User",
 					"uraian"		=> $uraian,
 					"tanggal"		=> date('Y-m-d'),
-					"is_read"		=> FALSE,
+					"is_read"		=> 0,
 				);
 				$notification = $this->Dbhelper->insertData('mt_notifikasi', $notifArray);
 
@@ -158,7 +155,7 @@ class Auth extends CI_Controller {
 					"nama"			=> "Verified New User",
 					"uraian"		=> $uraian,
 					"tanggal"		=> date('Y-m-d'),
-					"is_read"		=> FALSE,
+					"is_read"		=> 0,
 				);
 				$notification = $this->Dbhelper->insertData('mt_notifikasi', $notifArray);
 

@@ -5,13 +5,6 @@ class RoleCheck {
         $CI->load->library('session');
         $CI->load->helper('url');
 
-        // Clear any persistent alert messages that might be stuck from failed logins
-        $session_data = $CI->session->userdata('user_dashboard');
-        if (!empty($session_data)) {
-            // User is logged in - clear any leftover alert messages
-            $CI->session->unset_userdata('__ci_flash');
-        }
-
         $uri = $CI->uri->segment(1); // prefix pertama: admin/guru/siswa
         $uri2 = $CI->uri->segment(2); // prefix pertama: admin/guru/siswa
         $role = $CI->session->userdata('user_dashboard')['role'] ?? null;

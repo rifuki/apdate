@@ -30,7 +30,9 @@
       <div class="card-body">
         <div class="mb-3">
           <a href="<?= base_url('guru/jadwal-kelas/detail/'.$pertemuan['jadwal_kelas_id']) ?>" class="btn btn-warning">Kembali</a>
-          <button class="btn btn-primary" data-toggle="modal" data-target="#modalDiskusi" id="btnAddDiskusi">Tambah Diskusi</button>
+          <?php if ($pertemuan['status'] == 0): ?>
+            <button class="btn btn-primary" data-toggle="modal" data-target="#modalDiskusi" id="btnAddDiskusi">Tambah Diskusi</button>
+          <?php endif ?>
         </div>
 
         <!-- Card List Diskusi -->
@@ -49,12 +51,16 @@
                     <div class="d-flex justify-content-between align-items-center">
                       <div>
                         <span class="font-weight-bold"><?= htmlspecialchars($d['user_nama'] ?? '-') ?> - <?= htmlspecialchars($d['user_induk'] ?? '-') ?></span><br>
-                        <div class="mt-2"><?= nl2br($d['deskripsi']) ?></div>
-                        <div class="mt-4 small text-muted">
-                          <i class="fa fa-clock"></i> <?= date('d M Y H:i', strtotime($d['updated_at'] ?? $d['created_at'])) ?>  
-                        </div>
+                         <?php if (!empty($d['deleted_by_admin'])): ?>
+                          <div class="mt-2 text-danger"><em>This discussion has been deleted by admin.</em></div>
+                        <?php else: ?>
+                          <div class="mt-2"><?= nl2br($d['deskripsi']) ?></div>
+                          <div class="mt-4 small text-muted">
+                            <i class="fa fa-clock"></i> <?= date('d M Y H:i', strtotime($d['updated_at'] ?? $d['created_at'])) ?>  
+                          </div>
+                        <?php endif ?>
                       </div>
-                      <?php if($user['user']['id'] == $d['user_id']): ?>
+                      <?php if($user['user']['id'] == $d['user_id'] && $pertemuan['status'] == 0): ?>
                         <div>
                           <button class="btn btn-sm btn-warning btnEditDiskusi" data-id="<?= $d['id'] ?>" data-deskripsi="<?= htmlspecialchars($d['deskripsi']) ?>" data-toggle="modal" data-target="#modalDiskusi">Edit</button>
                           <?php if ($isDeletable): ?>

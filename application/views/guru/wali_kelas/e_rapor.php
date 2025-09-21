@@ -54,7 +54,11 @@
                           <td><?= htmlspecialchars($row['nisn']) ?></td>
                           <td><?= htmlspecialchars($row['nama']) ?></td>
                           <td><button type="button" data-siswaid="<?= $row['siswa_id'] ?>" data-kelasid="<?= $row['kelas_id'] ?>" class="btn btn-info btnDetail">Lihat Detail Rapor</button></td>
-                          <td><a href="<?= base_url('guru/wali-kelas/e-rapor/detail_page') ?>" target="_blank" class="btn btn-success">E-Rapor</a></td>
+                          <td>
+                            <?php if (!empty($row['rapor'])): ?>
+                              <a href="<?= base_url('guru/wali-kelas/e-rapor/pdf/'.$row['rapor']) ?>" target="_blank" class="btn btn-success">E-Rapor</a>
+                            <?php endif ?>
+                          </td>
                         </tr>
                       <?php endforeach; ?>
                     <?php else: ?>
@@ -67,6 +71,38 @@
             </div>
             <!-- <button type="submit" class="btn btn-info btn-flat">Simpan Pengaturan</button> -->
             </form>
+          </div>
+          <div class="col-md-12">
+            <div class="table-responsive mt-2">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th width="30%">GRADE</th>
+                    <th width="40%">KETERANGAN</th>
+                    <th width="15%">NILAI AWAL</th>
+                    <th width="15%">NILAI AKHIR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <form id="frm-penilaian">
+                    <?php if (!empty($list_grading)): ?>
+                      <?php foreach ($list_grading as $row): ?>
+                        <tr>
+                          <td><?= htmlspecialchars($row['grade']) ?></td>
+                          <td><?= htmlspecialchars($row['keterangan']) ?></td>
+                          <td><?= htmlspecialchars($row['nilai_min']) ?></td>
+                          <td><?= htmlspecialchars($row['nilai_max']) ?></td>
+                        </tr>
+                      <?php endforeach; ?>
+                    <?php else: ?>
+                      <tr>
+                        <td colspan="4" class="text-center">Data tidak ditemukan.</td>
+                      </tr>
+                    <?php endif; ?>
+                  </form>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -106,12 +142,42 @@
       if (data.status) {
         $('#eraporDetailBody').html(data.data.view);
         $('#modalDetail').modal('show');
+        return toastSuccess(data.message);
       }
-      return toastSuccess(data.message);
+      return toastError(error.message);
     })
     .catch(error => {
         console.error('Gagal:', error);
-        return toastError('Gagal update data!');
+        return toastError(error.message);
     });
   });
+
+  function editRapor() {
+    $(".nilai_akhir").attr('readonly', false);
+    $("#btn-edit-nilai").hide();
+    $("#btn-simpan-nilai").show();
+  }
+  
+  function generateRapor(close) {
+    let formData = new FormData($("#frm-rapor")[0]);
+    formData.append("is_close", close);
+    fetch("<?= base_url('guru/wali-kelas/e-rapor/submit') ?>", {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json()) // jika kamu kirim JSON, sesuaikan
+    .then(data => {
+      if (data.status) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+        return toastSuccess(data.message);
+      }
+      return toastError(error.message);
+    })
+    .catch(error => {
+        console.error('Gagal:', error);
+        return toastError(error.message);
+    });
+  }
 </script>

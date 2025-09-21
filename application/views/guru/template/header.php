@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
   <link rel="stylesheet" href="<?php echo base_url() ?>/assets/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
   <link rel="stylesheet" href="<?php echo base_url() ?>/assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+  <link rel="stylesheet" href="<?php echo base_url() ?>/assets/plugins/jqvmap/jqvmap.min.css">
   <link rel="stylesheet" href="<?php echo base_url() ?>/assets/dist/css/adminlte.min.css">
   <link rel="stylesheet" href="<?php echo base_url() ?>/assets/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
   <link rel="stylesheet" href="<?php echo base_url() ?>/assets/plugins/daterangepicker/daterangepicker.css">
@@ -76,7 +77,7 @@
           <i class="fas fa-th-large"></i>
         </a>
         <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-          <a href="<?php echo admin_url('profile') ?>" class="dropdown-item">
+          <a href="<?php echo base_url('guru/profil') ?>" class="dropdown-item">
             <i class="nav-icon fas fa-user"></i>&nbsp;&nbsp;Profil
           </a>
           <a href="<?php echo base_url() ?>guru/logout" class="dropdown-item">
@@ -103,7 +104,6 @@
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <li class="nav-item "><a href="<?= base_url('guru/dashboard') ?>" class="nav-link"><i class="nav-icon fas fa-home"></i><p>Dashboard</p></a></li>
-          <li class="nav-item "><a href="<?= base_url('guru/akademik') ?>" class="nav-link"><i class="nav-icon fas fa-star"></i><p>Akademik</p></a></li>
           <li class="nav-item "><a href="<?= base_url('guru/lms') ?>" class="nav-link"><i class="nav-icon fas fa-book"></i><p>LMS</p></a></li>
           <li class="nav-item "><a href="<?= base_url('guru/laporan-absensi') ?>" class="nav-link"><i class="nav-icon fas fa-file"></i><p>Rekap Absensi</p></a></li>
           <li class="nav-item "><a href="<?= base_url('guru/laporan-penilaian') ?>" class="nav-link"><i class="nav-icon fas fa-file"></i><p>Rekap Penilaian</p></a></li>

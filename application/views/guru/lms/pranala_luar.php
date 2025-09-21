@@ -30,7 +30,9 @@
       <div class="card-body">
         <div class="mb-3">
           <a href="<?= base_url('guru/jadwal-kelas/detail/'.$pertemuan['jadwal_kelas_id']) ?>" class="btn btn-warning">Kembali</a>
-          <button class="btn btn-primary" data-toggle="modal" data-target="#modalPranalaLuar" id="btnAddPranala">Tambah Pranala Luar</button>
+          <?php if ($pertemuan['status'] == 0): ?>
+              <button class="btn btn-primary" data-toggle="modal" data-target="#modalPranalaLuar" id="btnAddPranala">Tambah Pranala Luar</button>
+          <?php endif ?>
         </div>
         <div class="table-responsive">
           <table class="table table-bordered table-striped">
@@ -52,14 +54,16 @@
                     <td><?= htmlspecialchars($row['deskripsi']) ?></td>
                     <td><a href="<?= htmlspecialchars($row['link']) ?>" target="_blank">Lihat</a></td>
                     <td>
-                      <button class="btn btn-sm btn-warning btnEditPranala" 
-                        data-id="<?= $row['id'] ?>" 
-                        data-judul="<?= htmlspecialchars($row['judul']) ?>" 
-                        data-deskripsi="<?= htmlspecialchars($row['deskripsi']) ?>" 
-                        data-link="<?= htmlspecialchars($row['link']) ?>"
-                        data-toggle="modal" data-target="#modalPranalaLuar">
-                        Edit
-                      </button>
+                      <?php if ($pertemuan['status'] == 0): ?>
+                        <button class="btn btn-sm btn-warning btnEditPranala" 
+                          data-id="<?= $row['id'] ?>" 
+                          data-judul="<?= htmlspecialchars($row['judul']) ?>" 
+                          data-deskripsi="<?= htmlspecialchars($row['deskripsi']) ?>" 
+                          data-link="<?= htmlspecialchars($row['link']) ?>"
+                          data-toggle="modal" data-target="#modalPranalaLuar">
+                          Edit
+                        </button>
+                      <?php endif ?>
                     </td>
                   </tr>
                 <?php endforeach; ?>

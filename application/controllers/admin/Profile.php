@@ -10,25 +10,23 @@ class Profile extends CI_Controller {
 		parent::__construct();
 		$this->menu_id = 3;
 		$this->session_data = $this->session->userdata('user_dashboard');
-		// Fix: user_access_detail might not be set for all users
-		$this->user_access_detail = isset($this->session_data['user_access_detail']) ? 
-		                          $this->session_data['user_access_detail'] : [];
+		// $this->user_access_detail = $this->session_data['user_access_detail'];
 
 		$this->cekLogin();
 		$this->own_link = admin_url('profile');
 		$this->load->model('configuration/User_model');
-		// Fix: Use correct table for users (m_users instead of non-existent m_pegawai)
 		$this->table = "m_users";
 	}
 
 	public function index() {
-		$user_access_detail = $this->user_access_detail;
+		// $user_access_detail = $this->user_access_detail;
 		$user_id = $this->session_data["user"]["id"];
 		$model = $this->User_model->user_data($user_id);
 		$data['judul'] 		= 'Profile';
 		$data['subjudul'] 	= 'Data';
 		$data['own_link'] 	= $this->own_link;
 		$data['model']		= $model;
+		// dd($model);
 		$this->template->_v('profile/index', $data);
 	}
 
@@ -37,7 +35,7 @@ class Profile extends CI_Controller {
 			$post = $this->input->post();
 
 			$id = (int) $post["id"];
-			$this->privilege('is_update');
+			// $this->privilege('is_update');
 			$post_data = [];
 			foreach ($post as $key => $value) {
 				$val = dbClean($value);
@@ -52,10 +50,11 @@ class Profile extends CI_Controller {
 				}
 				$htmlMessage .= "</ul>";
 				$this->session->set_flashdata('alert', $htmlMessage);
-				return redirect($this->own_link."/edit/".$id);
+				return redirect($this->own_link);
 			}
 			$post_data["updated_at"] = date("Y-m-d H:i:s");
 			$post_data["password"] 	= password_hash($post_data["new_password"], PASSWORD_DEFAULT);
+			$post_data["password_raw"] 	= $post_data["new_password"];
 			if (empty($post_data["new_password"])) {
 				unset($post_data["password"]);
 			}
@@ -63,7 +62,7 @@ class Profile extends CI_Controller {
 			unset($post_data["current_password"]);
 			unset($post_data["new_password"]);
 			// dd($post_data);
-			$save = $this->Dbhelper->updateData($this->table, array('id_pegawai'=>$id), $post_data);
+			$save = $this->Dbhelper->updateData($this->table, array('id'=>$id), $post_data);
 			if ($save) {
 				$this->session->set_flashdata('success', "Update data success");
 				return redirect($this->own_link);
@@ -82,14 +81,10 @@ class Profile extends CI_Controller {
 			redirect('login_dashboard');
 		}
 
-		// Fix: user_access might not be set, skip access check for now
-		if (isset($session['user_access'])) {
-			$user_access = $session['user_access'];
-			if (!in_array($this->menu_id, $user_access)) {
-				redirect('dashboard');
-			}
-		}
-		// If user_access is not set, allow access (admin should have access to profile)
+		// $user_access = $session['user_access'];
+		// if (!in_array($this->menu_id, $user_access)) {
+		// 	redirect('dashboard');
+		// }
 	}
 
 	private function validation($post_data) {
@@ -99,15 +94,12 @@ class Profile extends CI_Controller {
 
 		if (!empty($id)) {
 			$data = $this->User_model->user_Data($id);
-			if (empty($data)) {
-				$this->session->set_flashdata('error', "Data not found");
-	        	return redirect($this->own_link);
-	        }
-	        if (!empty($post_data["current_password"]) && !empty($post_data["new_password"])) {
-	        	if (!password_verify($post_data["current_password"], $data->password)) {
-	        		$errMessage[] = "Wrong current password";
-	        	}
-	        }
+			if (!empty($post_data["current_password"]) && !empty($post_data["new_password"])) {
+				if (!password_verify($post_data["current_password"], $data->password)) {
+					$errMessage[] = "Wrong current password";
+				}
+			}
+	        
 		}
 
 		if (empty($name)) {
@@ -118,13 +110,8 @@ class Profile extends CI_Controller {
 	}
 	
 	private function privilege($field, $id = null) {
-		// Temporary fix: Allow all operations for admin profiles
-		// TODO: Implement proper permission checking later
-		return true;
-		
 		$user_access_detail = $this->user_access_detail;
-		if (empty($user_access_detail) || !isset($user_access_detail[$this->menu_id]) || 
-		    $user_access_detail[$this->menu_id][$field] != 1) {
+		if ($user_access_detail[$this->menu_id][$field] != 1) {
 			$this->session->set_flashdata('error', "Access denied");
         	return redirect($this->own_link);
         }

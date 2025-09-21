@@ -77,8 +77,7 @@ class Guru extends CI_Controller {
 
 	public function create() {
 		$this->privilege('is_create');
-		// Fix: Convert boolean to string for PostgreSQL compatibility
-		$periode = $this->Dbhelper->selectTabelOne('id, tahun_ajaran', 'mt_periode', array("is_active" => '1'));
+		$periode = $this->Dbhelper->selectTabelOne('id, tahun_ajaran', 'mt_periode', array("is_active" => 1));
 
 		$data['judul'] 		= $this->judul;
 		$data['subjudul'] = 'Create Data';
@@ -101,8 +100,7 @@ class Guru extends CI_Controller {
 
 		$model_mapel = $this->Guru_model->find_mapel($id, true);
 		$periode = $this->Dbhelper->selectTabelOne('id, tahun_ajaran', 'mt_periode', array("id" => $model->join_periode_id));
-		// Fix: Convert boolean to string for PostgreSQL compatibility
-		$mata_pelajaran = $this->Dbhelper->selectTabel('id, code, name', 'mt_mata_pelajaran', array("is_active" => '1'), 'code', 'ASC');
+		$mata_pelajaran = $this->Dbhelper->selectTabel('id, code, name', 'mt_mata_pelajaran', array("is_active" => 1), 'code', 'ASC');
 		$data['judul'] 			= $this->judul;
 		$data['subjudul'] 		= 'Edit Data';
 		$data['own_link'] 		= $this->own_link;
@@ -230,8 +228,16 @@ class Guru extends CI_Controller {
 	}
 
 	public function delete($id) {
-		$this->privilege('is_delete');
+		// $this->privilege('is_delete');
 		$id = (int) $id;
+
+		$active_periode = active_periode();
+		$active_guru = $this->Guru_model->find_active_guru($active_periode['periode_id'], $id);
+		if (!empty($active_guru)) {
+			$this->session->set_flashdata('error', "Data guru sedang aktif di periode ".$active_periode['tahun_ajaran'].", tidak dapat dihapus.");
+			return redirect($this->own_link);
+		}
+
 		$model = $this->Guru_model->find($id);
         if (empty($model)) {
 			$this->session->set_flashdata('error', "Data not found");
@@ -240,12 +246,11 @@ class Guru extends CI_Controller {
 
         $deleted_at = date("Y-m-d H:i:s");
 		$save = $this->Dbhelper->updateData($this->table, array('id'=>$id), array("deleted_at" => $deleted_at));
+		$save = $this->Dbhelper->updateData('m_users', array('id'=>$model->users_id), array("deleted_at" => $deleted_at));
 		if ($save) {
 			$this->session->set_flashdata('success', "Delete data success");
-		} else {
-			$this->session->set_flashdata('error', "Delete data failed");
+			return redirect($this->own_link);
 		}
-		return redirect($this->own_link);
 	}
 
 	public function export() {
@@ -278,7 +283,7 @@ class Guru extends CI_Controller {
 					"J" => "email",
 					"K" => "nomor_hp",
 					"L" => "alamat",
-					"M" => "join_periode_id", // Nama kolom di DB untuk "PERIODE_BERGABUNG"
+					"M" => "asal_universitas", // Nama kolom di DB untuk "PERIODE_BERGABUNG"
 				];
 
 				$rowsDataGuru = [];
@@ -577,10 +582,6 @@ class Guru extends CI_Controller {
 	}
 	
 	private function privilege($field, $id = null) {
-		// Temporary fix: Allow all operations for now
-		// TODO: Implement proper permission checking later
-		return true;
-		
 		// $user_access_detail = $this->user_access_detail;
 		// if ($user_access_detail[$this->menu_id][$field] != 1) {
 		// 	$this->session->set_flashdata('error', "Access denied");

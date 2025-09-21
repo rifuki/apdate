@@ -12,19 +12,13 @@
 						a.*,
 						b.nisn,
 						b.nama,
-						(SELECT SUM(nilai) 
-						FROM tr_rapor_penilaian 
-						WHERE rapor_id = a.id AND jadwal_id = ?) AS total_nilai
+						100 AS total_nilai
 				FROM 
 						tr_rapor AS a
 				INNER JOIN 
 						mt_users_siswa AS b ON a.siswa_id = b.id
 				WHERE
 						a.semester_id = ?
-						AND EXISTS (
-						SELECT 1 FROM tr_rapor_penilaian 
-						WHERE rapor_id = a.id AND jadwal_id = ?
-					)
 			";
 			$result = $this->db->query($query, [$jadwal_id, $semester_id, $jadwal_id])->result_array();
 			return $result;
@@ -50,17 +44,13 @@
 				SELECT
 						a.*,
 						b.nisn,
-						b.nama,
-						COALESCE(d.nilai, '0') AS nilai,
-						d.is_final
+						b.nama
 				FROM 
 						tref_kelas_siswa AS a
 				INNER JOIN 
 						mt_users_siswa AS b ON a.siswa_id = b.id
 				INNER JOIN 
 						tref_kelas_jadwal_pelajaran AS c ON a.kelas_id = c.kelas_id
-				LEFT JOIN
-						tr_rapor_penilaian AS d ON a.siswa_id = d.siswa_id AND c.id = d.jadwal_id AND d.semester_id = c.semester_id
 				WHERE
 						c.id = ? AND c.semester_id = ?
 			";
@@ -76,7 +66,35 @@
 						b.nama,
 						d.nilai_akhir,
 						d.grade,
-						d.keterangan
+						d.keterangan,
+						(SELECT COUNT(id) FROM tref_pertemuan_absensi WHERE jadwal_kelas_id = c.id AND siswa_id = a.siswa_id AND status_kehadiran = 'hadir') as absensi_kehadiran,
+						(
+							SELECT FLOOR(AVG(nilai) + 0.5) 
+							FROM tref_pertemuan_tugas sub_a 
+							INNER JOIN tref_pertemuan sub_b ON sub_a.pertemuan_id = sub_b.id
+							WHERE 
+								sub_a.jadwal_kelas_id = c.id AND
+								sub_a.siswa_id = a.siswa_id AND
+								sub_b.pertemuan_ke NOT IN ('UTS', 'UAS')
+						) as nilai_tugas,
+						(
+							SELECT nilai
+							FROM tref_pertemuan_tugas sub_a 
+							INNER JOIN tref_pertemuan sub_b ON sub_a.pertemuan_id = sub_b.id
+							WHERE 
+								sub_a.jadwal_kelas_id = c.id AND
+								sub_a.siswa_id = a.siswa_id AND
+								sub_b.pertemuan_ke = 'UTS'
+						) as nilai_uts,
+						(
+							SELECT nilai
+							FROM tref_pertemuan_tugas sub_a 
+							INNER JOIN tref_pertemuan sub_b ON sub_a.pertemuan_id = sub_b.id
+							WHERE 
+								sub_a.jadwal_kelas_id = c.id AND
+								sub_a.siswa_id = a.siswa_id AND
+								sub_b.pertemuan_ke = 'UAS'
+						) as nilai_uas
 				FROM 
 						tref_kelas_siswa AS a
 				INNER JOIN 
@@ -112,57 +130,69 @@
 		}
 
 		public function listEGrading($kelas_id, $siswa_id) {
+			// $query = "
+			// 	SELECT
+			// 		a.*,
+			// 		b.jumlah_pertemuan,
+			// 		c.code AS mapel_code,
+			// 		c.name AS mapel_name,
+			// 		d.nip AS guru_code,
+			// 		d.nama AS guru_name
+			// 	FROM tr_egrading_siswa AS a
+			// 	INNER JOIN
+			// 		tref_kelas_jadwal_pelajaran AS b ON a.jadwal_kelas_id = b.id
+			// 	INNER JOIN
+			// 		mt_mata_pelajaran AS c ON b.mata_pelajaran_id = c.id
+			// 	INNER JOIN
+			// 		mt_users_guru AS d ON b.guru_id = d.id
+			// 	WHERE
+			// 		b.kelas_id = ? AND a.siswa_id = ?
+			// ";
+
 			$query = "
 				SELECT
-					a.*,
 					b.jumlah_pertemuan,
 					c.code AS mapel_code,
 					c.name AS mapel_name,
 					d.nip AS guru_code,
-					d.nama AS guru_name
-				FROM tr_egrading_siswa AS a
-				INNER JOIN
-					tref_kelas_jadwal_pelajaran AS b ON a.jadwal_kelas_id = b.id
+					d.nama AS guru_name,
+					a.id,
+					a.nilai_akhir,
+					a.grade,
+					a.keterangan
+				FROM tref_kelas_jadwal_pelajaran AS b
 				INNER JOIN
 					mt_mata_pelajaran AS c ON b.mata_pelajaran_id = c.id
 				INNER JOIN
 					mt_users_guru AS d ON b.guru_id = d.id
-				WHERE
-					b.kelas_id = ? AND a.siswa_id = ?
+				LEFT JOIN tr_egrading_siswa AS a
+					ON b.id = a.jadwal_kelas_id AND a.siswa_id = ?
+				WHERE 
+					b.kelas_id = ?
 			";
-			$result = $this->db->query($query, [$kelas_id, $siswa_id])->result_array();
+			$result = $this->db->query($query, [$siswa_id, $kelas_id])->result_array();
 			return $result;
 		}
 
-		public function listSiswa($kelas_id, $semester_id) {
+		public function listSiswa($kelas_id, $periode_id, $semester_id = null) {
+			$addSelectStatement = !empty($semester_id) ? ",
+					(SELECT id FROM tr_rapor WHERE siswa_id = a.siswa_id AND semester_id = '$semester_id') as rapor" : "";
 			$query = "
 				SELECT
-						a.*,
-						b.nisn,
-						b.nama
+					a.*,
+					b.nisn,
+					b.nama
+					$addSelectStatement
 				FROM 
 						tref_kelas_siswa AS a
 				INNER JOIN 
-						mt_users_siswa AS b ON a.siswa_id = b.id
+					mt_users_siswa AS b ON a.siswa_id = b.id
 				INNER JOIN
-						tref_kelas AS c ON a.kelas_id = c.id
+					tref_kelas AS c ON a.kelas_id = c.id
 				WHERE
 					a.kelas_id = ? AND c.periode_id = ?
 			";
-			$result = $this->db->query($query, [$kelas_id, $semester_id])->result_array();
-			return $result;
-		}
-
-		public function checkRapor($semester_id, $siswa_id) {
-			$query = "
-				SELECT
-					*
-				FROM 
-					tr_rapor
-				WHERE
-					semester_id = ? AND siswa_id = ?
-			";
-			$result = $this->db->query($query, [$semester_id, $siswa_id])->row_array();
+			$result = $this->db->query($query, [$kelas_id, $periode_id])->result_array();
 			return $result;
 		}
 
@@ -176,19 +206,6 @@
 					id = ?
 			";
 			$result = $this->db->query($query, [$id])->row_array();
-			return $result;
-		}
-
-		public function checkNilai($rapor_id, $semester_id, $siswa_id, $jadwal_id) {
-			$query = "
-				SELECT
-					*
-				FROM 
-					tr_rapor_penilaian
-				WHERE
-					rapor_id = ? AND semester_id = ? AND siswa_id = ? AND jadwal_id = ?
-			";
-			$result = $this->db->query($query, [$rapor_id, $semester_id, $siswa_id, $jadwal_id])->row_array();
 			return $result;
 		}
 	}

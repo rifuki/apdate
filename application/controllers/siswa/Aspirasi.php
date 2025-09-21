@@ -1,4 +1,4 @@
-<?php
+	<?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Aspirasi extends CI_Controller {
@@ -9,7 +9,11 @@ class Aspirasi extends CI_Controller {
 	}
 
 	public function index() {
-		
+		$check_status = setting_lms(['code' => 'aspirasi_status']);
+		if ($check_status['value'] == 'close') {
+			$this->session->set_flashdata('error', 'Menu aspirasi sedang ditutup oleh administrator.');
+			redirect('siswa/dashboard');
+		}
 		$session = $this->session->userdata('user_dashboard');
 		$active_periode = active_periode();
 

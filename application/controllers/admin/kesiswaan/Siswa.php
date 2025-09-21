@@ -77,8 +77,7 @@ class Siswa extends CI_Controller {
 
 	public function create() {
 		$this->privilege('is_create');
-		// Fix: Convert boolean to string for PostgreSQL compatibility  
-		$periode = $this->Dbhelper->selectTabelOne('id, tahun_ajaran', 'mt_periode', array("is_active" => '1'));
+		$periode = $this->Dbhelper->selectTabelOne('id, tahun_ajaran', 'mt_periode', array("is_active" => 1));
 
 		$data['judul'] 		= $this->judul;
 		$data['subjudul'] = 'Create Data';
@@ -200,22 +199,29 @@ class Siswa extends CI_Controller {
 	}
 
 	public function delete($id) {
-		$this->privilege('is_delete');
+		// $this->privilege('is_delete');
 		$id = (int) $id;
-		$model = $this->Siswa_model->find($id);
-        if (empty($model)) {
-			$this->session->set_flashdata('error', "Data not found");
-        	return redirect($this->own_link);
-        }
 
-        $deleted_at = date("Y-m-d H:i:s");
+		$active_periode = active_periode();
+		$active_siswa = $this->Siswa_model->find_active_siswa($active_periode['periode_id'], $id);
+		// dd($active_periode, $active_siswa);
+		if (!empty($active_siswa)) {
+			$this->session->set_flashdata('error', "Data siswa sedang aktif di periode ".$active_periode['tahun_ajaran'].", tidak dapat dihapus.");
+			return redirect($this->own_link);
+		}
+		
+		$model = $this->Siswa_model->find($id);
+    if (empty($model)) {
+			$this->session->set_flashdata('error', "Data not found");
+    	return redirect($this->own_link);
+    }
+    $deleted_at = date("Y-m-d H:i:s");
 		$save = $this->Dbhelper->updateData($this->table, array('id'=>$id), array("deleted_at" => $deleted_at));
+		$save = $this->Dbhelper->updateData('m_users', array('id'=>$model->users_id), array("deleted_at" => $deleted_at));
 		if ($save) {
 			$this->session->set_flashdata('success', "Delete data success");
-		} else {
-			$this->session->set_flashdata('error', "Delete data failed");
+			return redirect($this->own_link);
 		}
-		return redirect($this->own_link);
 	}
 
 	public function export() {
@@ -230,44 +236,7 @@ class Siswa extends CI_Controller {
 
 	public function import() {
     if ($this->input->server('REQUEST_METHOD') === 'POST') {
-        // Enhanced error handling and validation
-        if (!isset($_FILES['file'])) {
-            $this->session->set_flashdata('error', "Tidak ada file yang diupload.");
-            return redirect($this->own_link);
-        }
-        
-        if ($_FILES['file']['error'] !== UPLOAD_ERR_OK) {
-            $error_message = "Error upload file: ";
-            switch($_FILES['file']['error']) {
-                case UPLOAD_ERR_INI_SIZE:
-                    $error_message .= "File terlalu besar (melebihi upload_max_filesize)";
-                    break;
-                case UPLOAD_ERR_FORM_SIZE:
-                    $error_message .= "File terlalu besar (melebihi MAX_FILE_SIZE)";
-                    break;
-                case UPLOAD_ERR_PARTIAL:
-                    $error_message .= "File hanya terupload sebagian";
-                    break;
-                case UPLOAD_ERR_NO_FILE:
-                    $error_message .= "Tidak ada file yang diupload";
-                    break;
-                default:
-                    $error_message .= "Unknown error code " . $_FILES['file']['error'];
-                    break;
-            }
-            $this->session->set_flashdata('error', $error_message);
-            return redirect($this->own_link);
-        }
-
-        // Validate file type
-        $allowed_types = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
-                         'application/vnd.ms-excel'];
-        if (!in_array($_FILES['file']['type'], $allowed_types)) {
-            $this->session->set_flashdata('error', "Tipe file tidak valid. Gunakan file Excel (.xlsx atau .xls)");
-            return redirect($this->own_link);
-        }
-
-        try {
+        if (isset($_FILES['file']) && $_FILES['file']['error'] == UPLOAD_ERR_OK) {
             $fileTmpPath = $_FILES['file']['tmp_name'];
             $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($fileTmpPath);
             $sheet = $spreadsheet->getActiveSheet();
@@ -301,19 +270,6 @@ class Siswa extends CI_Controller {
             $kelas_list = [];
 
 			$active_periode = active_periode();
-			
-			// Validate active period
-			if (empty($active_periode) || $active_periode['status'] != '1') {
-			    $this->session->set_flashdata('error', "Tidak ada periode aktif. Import tidak dapat dilakukan.");
-			    return redirect($this->own_link);
-			}
-			
-			// Check if spreadsheet has data
-			$highestRow = $sheet->getHighestRow();
-			if ($highestRow < 2) {
-			    $this->session->set_flashdata('error', "File Excel kosong atau tidak memiliki data siswa.");
-			    return redirect($this->own_link);
-			}
 			// dd($active_periode);
             // Memulai iterasi dari baris ke-2 (untuk melewati header)
             foreach ($sheet->getRowIterator() as $i => $row) {
@@ -361,21 +317,6 @@ class Siswa extends CI_Controller {
                         }
                     }
 
-                    // Validate required fields
-                    $required_fields = ['nisn', 'nama', 'tanggal_lahir'];
-                    foreach ($required_fields as $field) {
-                        if (empty($rowData[$field])) {
-                            $this->session->set_flashdata('error', "Error baris $i: Field '$field' wajib diisi.");
-                            return redirect($this->own_link);
-                        }
-                    }
-
-                    // Validate NISN format (should be numeric)
-                    if (!ctype_digit($rowData['nisn'])) {
-                        $this->session->set_flashdata('error', "Error baris $i: NISN harus berupa angka.");
-                        return redirect($this->own_link);
-                    }
-
                     // Menyiapkan data untuk tabel m_users
                     $password_raw = date('Ymd', strtotime($rowData['tanggal_lahir']));
                     $rowsUsersData[] = [
@@ -413,12 +354,6 @@ class Siswa extends CI_Controller {
 
                     $nisn_list[] = $rowData["nisn"];
                 }
-            }
-
-            // Final validation before database operations
-            if (empty($rowsUsersData)) {
-                $this->session->set_flashdata('error', "Tidak ada data valid untuk diimpor.");
-                return redirect($this->own_link);
             }
 
             // 3. Menggunakan Transaction untuk keamanan data
@@ -468,12 +403,7 @@ class Siswa extends CI_Controller {
                 $this->session->set_flashdata('success', "Berhasil mengimpor " . count($rowsUsersData) . " data siswa dan orang tua.");
             }
             return redirect($this->own_link);
-        } catch (Exception $e) {
-            // Handle PhpSpreadsheet or other exceptions
-            $this->session->set_flashdata('error', "Error memproses file Excel: " . $e->getMessage());
-            return redirect($this->own_link);
         }
-        
         $this->session->set_flashdata('error', "Gagal mengunggah file.");
         return redirect($this->own_link);
     }
@@ -659,10 +589,6 @@ class Siswa extends CI_Controller {
 	}
 	
 	private function privilege($field, $id = null) {
-		// Temporary fix: Allow all operations for now
-		// TODO: Implement proper permission checking later
-		return true;
-		
 		// $user_access_detail = $this->user_access_detail;
 		// if ($user_access_detail[$this->menu_id][$field] != 1) {
 		// 	$this->session->set_flashdata('error', "Access denied");

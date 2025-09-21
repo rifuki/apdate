@@ -84,16 +84,18 @@
       </div>
       <div class="modal-body" id="eraporDetailBody">
         <form id="frm-ekstrakulikuler">
+          <input type="hidden" name="siswa_id" id="frm_siswa_id" />
+          <input type="hidden" name="kelas_id" id="frm_kelas_id" />
+          <?php if ($active_periode['status_code'] == 2): ?>
           <div class="form-group row">
             <div class="col-lg-6 col-sm-12">
-              <input type="hidden" name="siswa_id" id="frm_siswa_id" />
-              <input type="hidden" name="kelas_id" id="frm_kelas_id" />
-              <input type="text" name="ekstrakulikuler" class="form-control" />
+              <input type="text" id="ekstrakulikuler_text" name="ekstrakulikuler" class="form-control" required />
             </div>
             <div class="col-lg-6 col-sm-12">
               <button type="button" onclick="simpanEkstrakulikuler()" class="btn btn-success btn-flat">Tambah</button>
             </div>
           </div>
+          <?php endif ?>
         </form>
         <div class="table-responsive mt-2">
           <table class="table table-bordered table-striped">
@@ -103,26 +105,14 @@
                 <th width="90%">Ekstrakulikuler</th>
               </tr>
             </thead>
-            <tbody>
-              <!-- <?php $settingFilter = json_decode($setting[2]['value']) ?? []; ?>
-              <?php if (!empty($settingFilter)): ?>
-                  <?php foreach ($settingFilter as $row): ?>
-                    <tr>
-                      <td><input type="checkbox" name="filter" value="<?= $row ?>"></td>
-                      <td><?= $row ?></td>
-                    </tr>
-                  <?php endforeach ?>
-                <?php else: ?>
-                  <tr>
-                    <td colspan="2" class="text-center">Data tidak ditemukan.</td>
-                  </tr>
-                <?php endif; ?> -->
-            </tbody>
+            <tbody id="ekstrakulikuler_table"></tbody>
           </table>
         </div>
+        <?php if ($active_periode['status_code'] == 2): ?>
         <div class="mt-2">
             <button type="button" class="btn btn-danger btn-flat" onclick="hapusEkstrakulikuler()">Hapus Ekstrakulikuler</button>
         </div>
+        <?php endif ?>
       </div>
     </div>
   </div>
@@ -133,6 +123,7 @@
   $(document).on('click', '.btnDetail', function(e) {
     const kelasid = $(this).data('kelasid');
     const siswaid = $(this).data('siswaid');
+    $('#ekstrakulikuler_table').empty();
     let formData = new FormData();
     formData.append('siswa_id', siswaid);
     formData.append('kelas_id', kelasid);
@@ -159,7 +150,7 @@
                     <td colspan="2" class="text-center">Data tidak ditemukan.</td>
                   </tr>`;
         }
-        $('table tbody').html(tbody);
+        $('#ekstrakulikuler_table').html(tbody);
       }
       $("#frm_siswa_id").val(siswaid);
       $("#frm_kelas_id").val(kelasid);
@@ -173,6 +164,10 @@
   });
 
   function simpanEkstrakulikuler() {
+    if ($("#ekstrakulikuler_text").val() === '') {
+      return toastError('Inputan tidak boleh kosong');
+    }
+
     var form = document.getElementById('frm-ekstrakulikuler');
     var formData = new FormData(form);
     formData.append('type', 'tambah_ekstrakulikuler');

@@ -49,7 +49,9 @@
           </div>
           <div class="form-group mt-2">
             <a href="<?= base_url('guru/jadwal-kelas/detail/'.$pertemuan['jadwal_kelas_id']) ?>" class="btn btn-warning">Batal</a>
-            <button type="submit" class="btn btn-success">Simpan</button>
+            <?php if ($pertemuan['status'] == 0): ?>
+              <button type="submit" class="btn btn-success">Simpan</button>
+            <?php endif ?>
           </div>
         </form>
       </div>

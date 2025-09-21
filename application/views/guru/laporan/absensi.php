@@ -34,7 +34,6 @@
           </div>
         </form>
         <br>
-        <?php $is_final = 0; ?>
         <div class="row">
           <div id="rowSiswa" class="col-md-12">
             <div class="table-responsive mt-5">
@@ -50,7 +49,6 @@
                   <form id="frm-penilaian">
                     <?php if (!empty($list_penilaian)): ?>
                       <?php foreach ($list_penilaian as $row): ?>
-                        <?php $is_final = $row['is_final'] == 1 ? 1 : $is_final; ?>
                         <tr>
                           <td><?= htmlspecialchars($row['nisn']) ?></td>
                           <td><?= htmlspecialchars($row['nama']) ?></td>

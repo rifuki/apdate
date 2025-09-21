@@ -76,6 +76,13 @@ class SettingLms extends CI_Controller {
 						throw new Exception("Gagal mengubah setting filter kalimat");
 					}
 
+				} elseif ($type == 'aspirasi') {
+					$aspirasi_status = $post['aspirasi_status'];
+					$update = $this->db->where('code', 'aspirasi_status')->update($this->table, ['value' => $aspirasi_status]);
+					if (!$update) {	
+						throw new Exception("Gagal mengubah setting menu aspirasi");
+					}
+
 				} else {
 					throw new Exception("Tipe tidak dikenali");
 				}

@@ -28,9 +28,8 @@ class Generate extends CI_Controller {
 			return redirect('dashboard');
 		}
 
-		// Allow operations in multiple statuses for flexibility
-		if (!in_array($active_periode['status'], ['1.1', '1.2', '1.3', '1.4'])) {
-			$this->session->set_flashdata('error', "Fitur ini memerlukan periode dalam status Assign Mata Pelajaran (1.1) atau lebih tinggi");
+		if ($active_periode['status'] != '1.3') {
+			$this->session->set_flashdata('error', "Gagal update karena periode saat ini belum dalam status Assign Siswa ke Kelas (1.3)");
 			return redirect('dashboard');
 		}
 
@@ -41,7 +40,7 @@ class Generate extends CI_Controller {
 		$tingkat_kelas 					= $this->Dbhelper->selectTabel('id, code, name', 'mt_tingkat_kelas', array(), 'code',' ASC');
 
 		$filter = [
-			"periode_id"				=> $periode_active->id,
+			"periode_id"				=> $periode_active->periode_id,
 			"tingkat_kelas_id" 	=> "",
 			"kelas_id"					=> ""
 		];
@@ -125,9 +124,8 @@ class Generate extends CI_Controller {
 			return redirect('dashboard');
 		}
 
-		// Allow operations in multiple statuses for flexibility
-		if (!in_array($active_periode['status'], ['1.1', '1.2', '1.3', '1.4'])) {
-			$this->session->set_flashdata('error', "Fitur ini memerlukan periode dalam status Assign Mata Pelajaran (1.1) atau lebih tinggi");
+		if ($active_periode['status'] != '1.4') {
+			$this->session->set_flashdata('error', "Gagal update karena periode saat ini belum dalam status Generate Jadwal Kelas (1.4)");
 			return redirect('dashboard');
 		}
 

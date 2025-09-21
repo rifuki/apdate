@@ -14,8 +14,7 @@
 			$this->db->select('mt_users_guru.id, mt_users_guru.nip, mt_users_guru.nama, mt_users_guru.email, mt_users_guru.nomor_hp, mt_periode.tahun_ajaran');
 	        $this->db->from($this->table);
 	        $this->db->join('mt_periode', $this->table.'.join_periode_id = mt_periode.id');
-	        // Filter out soft deleted records
-	        $this->db->where($this->table.'.deleted_at IS NULL');
+					$this->db->where('mt_users_guru.deleted_at IS NULL');
 	        $i = 0;  
 	        foreach ($this->column_search as $item) {
 	            if(isset($_POST['search']['value']) && !empty($_POST['search']['value'])) {
@@ -110,5 +109,19 @@
 			$result = $this->db->get()->result_array();
 	    	return $result;
 	    }
+
+			public function find_active_guru($periode_id, $guru_id) {
+				$query = "
+					SELECT a.*
+					FROM tref_kelas_jadwal_pelajaran a
+					INNER JOIN tref_kelas b ON a.kelas_id = b.id
+					WHERE 
+						b.periode_id = $periode_id AND
+						(a.guru_id = $guru_id OR b.guru_id = $guru_id)
+				";
+
+				$result = $this->db->query($query)->row();
+				return $result;
+			}
 	}
 ?>

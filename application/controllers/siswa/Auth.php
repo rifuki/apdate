@@ -30,13 +30,26 @@ class Auth extends CI_Controller {
 
 				$siswa = $this->Dbhelper->selectTabelOne('*', 'mt_users_siswa', array('users_id' => $user_id));
 
-				$menu_access = $this->Dbhelper->selectTabel('menu_access', 'm_users_group', array('id_grup' => $user_group_id));
+				// $user_access 		= [];
+				// $user_access_detail	= [];
+				// if (count($menu_access) > 0) {
+				// 	foreach ($menu_access as $access) {
+				// 		$menu_id 		= $access['menu_id'];
 
-				$user_access = [];
-				if (count($menu_access) > 0 && !empty($menu_access[0]['menu_access'])) {
-					$user_access = explode(',', $menu_access[0]['menu_access']);
-					$user_access = array_map('trim', $user_access);
-				}
+				// 		$is_create 		= $access['is_create'];
+				// 		$is_update 		= $access['is_update'];
+				// 		$is_delete 		= $access['is_delete'];
+				// 		$is_detail 		= $access['is_detail'];
+				// 		$access_detail 	= array(
+				// 			"is_create" => $is_create,
+				// 			"is_update" => $is_update,
+				// 			"is_delete" => $is_delete,
+				// 			"is_detail"	=> $is_detail
+				// 		);
+				// 		array_push($user_access, $menu_id);
+				// 		$user_access_detail[$menu_id] = $access_detail;
+				// 	}
+				// }
 
 				$data["user"] = array(
 					"id"			=> $user_id,

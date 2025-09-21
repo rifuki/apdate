@@ -23,7 +23,6 @@ class SettingPeriode extends CI_Controller {
 		$setting = $this->db->get($this->table)->result_array();
 		$active_periode = active_periode();
 		$list_periode = $this->db->get('mt_periode')->result_array();
-
 		$data['judul'] 		= $this->judul;
 		$data['subjudul'] 	= 'Setting';
 		$data['own_link'] 	= $this->own_link;
@@ -42,14 +41,42 @@ class SettingPeriode extends CI_Controller {
 				$semester = $post['semester'];
 				$status = $post['status'];
 
-				$reset_all = $this->db->where('is_active', TRUE)->update('mt_periode_semester', ['is_active' => FALSE]);
-				$reset_all = $this->db->where('is_active', TRUE)->update('mt_periode', ['is_active' => FALSE]);
+				$reset_all = $this->db->where('is_active', 1)->update('mt_periode_semester', ['is_active' => 0]);
+				$reset_all = $this->db->where('is_active', 1)->update('mt_periode', ['is_active' => 0]);
 
-				$update_periode = $this->db->where('id', $periode_id)->update('mt_periode', ['is_active' => TRUE]);
-				$update_periode_semester = $this->db->where('periode_id', $periode_id)->where('semester', $semester)->update('mt_periode_semester', ['is_active' => TRUE, 'status' => $status]);
+				$update_periode = $this->db->where('id', $periode_id)->update('mt_periode', ['is_active' => 1]);
+				$update_periode_semester = $this->db->where('periode_id', $periode_id)->where('semester', $semester)->update('mt_periode_semester', ['is_active' => 1, 'status' => $status]);
 				
 				if (!$update_periode || !$update_periode_semester) {
 					throw new Exception("Gagal mengubah setting periode");
+				}
+
+				// JIKA STATUS KBM FINISH / REPORTING
+				if ($status > 2) {
+					$close_all_pertemuan = $this->db->where('status', 0)->where('close_at is NULL', null, false)->update('tref_pertemuan', ['status' => 1, 'close_at' => date('Y-m-d H:i:s')]);
+				}
+
+				// JIKA STATUS NEW SEMESTER
+				if ($status == '1') {
+					foreach (['upload/modul', 'upload/tugas'] as $folder) {
+						$fullPath = FCPATH . $folder;
+						if (is_dir($fullPath)) {
+							$files = glob($fullPath . '/*');
+							if ($files) {
+								foreach ($files as $file) {
+									if (is_file($file)) {
+										@unlink($file);
+									} elseif (is_dir($file)) {
+										@rmdir($file);
+									}
+								}
+							}
+							@rmdir($fullPath);
+						}
+						if (!is_dir($fullPath)) {
+							@mkdir($fullPath, 0777, true);
+						}
+					}
 				}
 
 				$this->db->trans_commit();

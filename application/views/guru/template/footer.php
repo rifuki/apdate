@@ -3,7 +3,7 @@
     </div>
 
     <footer class="main-footer">
-      <strong>Copyright &copy; <?php echo date("Y"); ?> Basecode Codeigniter.</strong>
+      <strong>Copyright &copy; <?php echo date("Y"); ?> APDATE.</strong>
       All rights reserved.
       <div class="float-right d-none d-sm-inline-block">
         <b>Version</b> 0.1.0
@@ -43,10 +43,12 @@
         ?>
             toastError('<?php echo $this->session->flashdata("error"); ?>');
         <?php
+            unset($_SESSION['error']);
           } elseif ($this->session->flashdata("success")) {
         ?>
             toastSuccess('<?php echo $this->session->flashdata("success"); ?>');
         <?php
+            unset($_SESSION['success']);
           }
         ?>
 

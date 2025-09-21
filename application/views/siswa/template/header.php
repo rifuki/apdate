@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
   <link rel="stylesheet" href="<?php echo base_url() ?>/assets/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
   <link rel="stylesheet" href="<?php echo base_url() ?>/assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+  <link rel="stylesheet" href="<?php echo base_url() ?>/assets/plugins/jqvmap/jqvmap.min.css">
   <link rel="stylesheet" href="<?php echo base_url() ?>/assets/dist/css/adminlte.min.css">
   <link rel="stylesheet" href="<?php echo base_url() ?>/assets/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
   <link rel="stylesheet" href="<?php echo base_url() ?>/assets/plugins/daterangepicker/daterangepicker.css">
@@ -76,7 +77,7 @@
           <i class="fas fa-th-large"></i>
         </a>
         <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-          <a href="<?php echo admin_url('profile') ?>" class="dropdown-item">
+          <a href="<?php echo base_url('siswa/profil') ?>" class="dropdown-item">
             <i class="nav-icon fas fa-user"></i>&nbsp;&nbsp;Profil
           </a>
           <a href="<?php echo base_url() ?>siswa/logout" class="dropdown-item">
@@ -103,7 +104,35 @@
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <li class="nav-item "><a href="<?= base_url('siswa/dashboard') ?>" class="nav-link"><i class="nav-icon fas fa-home"></i><p>Dashboard</p></a></li>
-          <li class="nav-item "><a href="<?= base_url('guru/akademik') ?>" class="nav-link"><i class="nav-icon fas fa-star"></i><p>Akademik</p></a></li>
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
+             <i class="nav-icon fas fa-star"></i>
+              <p>
+                Akademik
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="<?= base_url('siswa/akademik/jadwal-pelajaran') ?>" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Jadwal Pelajaran</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="<?= base_url('siswa/akademik/nilai-semester') ?>" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Nilai Semester</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="<?= base_url('siswa/akademik/rangkuman-nilai') ?>" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Rangkuman Nilai</p>
+                </a>
+              </li>
+            </ul>
+          </li>
           <li class="nav-item "><a href="<?= base_url('siswa/aktifitas-lms') ?>" class="nav-link"><i class="nav-icon fas fa-book"></i><p>Aktifitas LMS</p></a></li>
           <li class="nav-item "><a href="<?= base_url('siswa/lms') ?>" class="nav-link"><i class="nav-icon fas fa-book"></i><p>LMS</p></a></li>
           <li class="nav-item "><a href="<?= base_url('siswa/aspirasi') ?>" class="nav-link"><i class="nav-icon fas fa-share"></i><p>Aspirasi Siswa</p></a></li>

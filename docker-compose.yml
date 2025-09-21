@@ -1,77 +1,66 @@
-# APDATE Educational Management System
-# One-command setup: docker-compose up -d
-
 services:
-  web:
-    image: php:8.0-apache
-    container_name: apdate_web
-    env_file:
-      - .env.local
+  app:
+    build: .
+    container_name: ${COMPOSE_PROJECT_NAME:-apdate}-app
     ports:
-      - "8080:80"
+      - "${APP_PORT:-8080}:80"
     volumes:
-      - .:/var/www/html
+      - ./upload:/var/www/html/upload
+      - ./application/logs:/var/www/html/application/logs
     environment:
-      - DB_HOST=${DB_HOST:-postgres}
+      - DB_HOST=${DB_HOST:-db}
       - DB_NAME=${DB_NAME:-apdate}
-      - DB_USER=${DB_USER:-postgres}
-      - DB_PASS=${DB_PASS:-postgres123}
+      - DB_USER=${DB_USER:-root}
+      - DB_PASS=${DB_PASS:-root_password}
+      - APP_ENV=${APP_ENV:-development}
+      - CI_ENV=${CI_ENV:-development}
+      - BASE_URL=${BASE_URL:-http://localhost:8080}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-apdatev2}
     depends_on:
-      postgres:
-        condition: service_healthy
-    command: >
-      bash -c "
-      echo '🚀 Starting APDATE Web Server Setup...' &&
-      apt-get update > /dev/null 2>&1 &&
-      apt-get install -y libpq-dev unzip libpng-dev libjpeg-dev libfreetype6-dev libzip-dev > /dev/null 2>&1 &&
-      docker-php-ext-configure gd --with-freetype --with-jpeg > /dev/null 2>&1 &&
-      docker-php-ext-install pdo pdo_pgsql pgsql gd zip > /dev/null 2>&1 &&
-      a2enmod rewrite > /dev/null 2>&1 &&
-      curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer > /dev/null 2>&1 &&
-      cd /var/www/html &&
-      composer install --no-dev --optimize-autoloader --no-interaction > /dev/null 2>&1 || 
-      composer update --no-dev --optimize-autoloader --no-interaction > /dev/null 2>&1 || 
-      echo 'Composer: Using existing vendor/' &&
-      find /var/www/html -type d -name .git -prune -o -type f -exec chown www-data:www-data {} + &&
-      find /var/www/html -type d -name .git -prune -o -type d -exec chown www-data:www-data {} + &&
-      chmod -R 777 /var/www/html/application/logs &&
-      chmod -R 777 /var/www/html/application/cache &&
-      chmod -R 777 /var/www/html/upload &&
-      echo '✅ APDATE Web Server Ready! Visit: http://localhost:8080' &&
-      apache2-foreground
-      "
+      - db
+    networks:
+      - apdate-network
 
-  postgres:
-    image: postgres:13
-    container_name: apdate_postgres
-    restart: unless-stopped
+  db:
+    image: mysql:8.0
+    container_name: ${COMPOSE_PROJECT_NAME:-apdate}-db
+    restart: always
     environment:
-      POSTGRES_DB: ${DB_NAME:-apdate}
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASS:-postgres123}
+      MYSQL_ROOT_PASSWORD: ${DB_PASS:-root_password}
+      MYSQL_DATABASE: ${DB_NAME:-apdate}
+      MYSQL_USER: ${DB_USER_NON_ROOT:-apdate_user}
+      MYSQL_PASSWORD: ${DB_USER_PASS:-apdate_password}
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-3306}:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./database.sql:/docker-entrypoint-initdb.d/01-schema.sql
-      - ./init-database.sql:/docker-entrypoint-initdb.d/02-setup.sql
+      - mysql_data:/var/lib/mysql
+      - ./DB_APDATE.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-apdate}"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASS:-root_password}"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - apdate-network
 
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: apdate_pgadmin
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin123
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: ${COMPOSE_PROJECT_NAME:-apdate}-phpmyadmin
+    restart: always
     ports:
-      - "8081:80"
+      - "${PHPMYADMIN_PORT:-8081}:80"
+    environment:
+      PMA_HOST: ${DB_HOST:-db}
+      PMA_PORT: 3306
+      PMA_USER: ${DB_USER:-root}
+      PMA_PASSWORD: ${DB_PASS:-root_password}
     depends_on:
-      - postgres
+      - db
+    networks:
+      - apdate-network
 
 volumes:
-  postgres_data:
+  mysql_data:
+
+networks:
+  apdate-network:
+    driver: bridge

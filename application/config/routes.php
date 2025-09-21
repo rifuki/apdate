@@ -8,6 +8,8 @@ $route['logout'] 								= 'auth/logout';
 
 $route["token/(:any)"]					= 'auth/token/$1';
 
+$route['ajax_siswa'] 				= 'Ajax/search_siswa';	
+
 $route['dashboard'] 								= 'admin/dashboard';
 
 /* CONFIGURATION ROUTES */
@@ -121,6 +123,9 @@ $route['dashboard'] 								= 'admin/dashboard';
 	$route['dashboard/kesiswaan/kelas/datatables'] 			= 'admin/kesiswaan/Kelas/datatables';
 	$route['dashboard/kesiswaan/kelas/list-siswa/(:any)']		= 'admin/kesiswaan/Kelas/list_siswa/$1';
 
+	$route['dashboard/kesiswaan/alumni'] 								= 'admin/kesiswaan/Alumni';
+	$route['dashboard/kesiswaan/alumni/datatables'] 			= 'admin/kesiswaan/Alumni/datatables';
+
 /* KESISWAAN ROUTES */
 
 /* GENERATE ROUTES */
@@ -137,12 +142,28 @@ $route['dashboard'] 								= 'admin/dashboard';
 	$route['dashboard/setting-lms'] 								= 'admin/SettingLms/index';
 	$route['dashboard/setting-lms/do_update'] 						= 'admin/SettingLms/do_update';
 
+	$route['dashboard/kenaikan-kelas'] 								= 'admin/KenaikanKelas/index';
+	$route['dashboard/kenaikan-kelas/datatables'] 		= 'admin/KenaikanKelas/datatables';
+	$route['dashboard/kenaikan-kelas/do_update'] 			= 'admin/KenaikanKelas/do_update';
+
 	
+	$route['dashboard/aspirasi'] 								= 'admin/Aspirasi/index';
+	$route['dashboard/aspirasi/datatables'] 		= 'admin/Aspirasi/datatables';
+
 	$route['dashboard/setting-periode'] 								= 'admin/SettingPeriode/index';
 	$route['dashboard/setting-periode/do_update'] 						= 'admin/SettingPeriode/do_update';
 
 	$route['dashboard/backup'] 								= 'admin/Backup/index';
 	$route['dashboard/backup/do-backup'] 			= 'admin/Backup/do_backup';
+
+	$route['dashboard/pantau-lms'] 													= 'admin/Lms/tingkat_kelas_index';
+	$route['dashboard/lms/kelas/(:any)'] 										= 'admin/Lms/lms_index/$1';
+	$route['dashboard/lms/detail/(:any)'] 									= 'admin/Lms/index/$1';
+	$route['dashboard/lms/pertemuan/absensi/(:any)'] 				= 'admin/Lms/absensi/$1';
+	$route['dashboard/lms/pertemuan/diskusi/(:any)'] 				= 'admin/Lms/diskusi/$1';
+	$route['dashboard/lms/pertemuan/diskusi-delete'] 				= 'admin/Lms/diskusi_delete';
+	$route['dashboard/lms/pertemuan/modul/(:any)'] 					= 'admin/Lms/modul/$1';
+	$route['dashboard/lms/pertemuan/pranala-luar/(:any)'] 	= 'admin/Lms/pranala_luar/$1';
 /* GENERATE ROUTES */
 
 /* GURU ROUTES */
@@ -181,8 +202,9 @@ $route['dashboard'] 								= 'admin/dashboard';
 
 	
 	$route['guru/wali-kelas/e-rapor'] 						= 'guru/WaliKelas/erapor';
-	$route['guru/wali-kelas/e-rapor/detail'] 			= 'guru/WaliKelas/erapor_detail';
-	$route['guru/wali-kelas/e-rapor/detail_page'] 			= 'guru/WaliKelas/erapor_detail_page';
+	$route['guru/wali-kelas/e-rapor/submit'] 				= 'guru/WaliKelas/erapor_submit';
+	$route['guru/wali-kelas/e-rapor/detail'] 				= 'guru/WaliKelas/erapor_detail';
+	$route['guru/wali-kelas/e-rapor/pdf/(:any)'] 			= 'guru/WaliKelas/erapor_pdf/$1';
 
 	$route['guru/wali-kelas/siswa'] 													= 'guru/WaliKelas/siswa';
 	$route['guru/wali-kelas/siswa/ekstrakulikuler'] 					= 'guru/WaliKelas/siswa_ekstrakulikuler';
@@ -201,11 +223,15 @@ $route['dashboard'] 								= 'admin/dashboard';
 	$route['guru/logout'] 				= 'guru/Auth/logout';
 	$route['guru/akademik'] 		= 'guru/Dashboard/akademik';
 	$route['guru/dokumen'] 		= 'guru/Dashboard/dokumen';
+	$route['guru/profil'] 					= 'guru/Dashboard/profil';
+	$route['guru/profil_update'] 					= 'guru/Dashboard/profil_update';
 
 /* SISWA ROUTES*/
 
 	$route['siswa'] 								= 'siswa/Dashboard/index';
 	$route['siswa/dashboard'] 			= 'siswa/Dashboard/index';
+	$route['siswa/profil'] 					= 'siswa/Dashboard/profil';
+	$route['siswa/profil_update'] 					= 'siswa/Dashboard/profil_update';
 	$route['siswa/lms'] 						= 'siswa/Dashboard/lms_index';
 	$route['siswa/login'] 					= 'siswa/Auth/login';
 	$route['siswa/logout'] 				= 'siswa/Auth/logout';
@@ -233,6 +259,13 @@ $route['dashboard'] 								= 'admin/dashboard';
 	$route['siswa/aspirasi/save'] 		= 'siswa/Aspirasi/save_aspirasi';
 	$route['siswa/konseling'] 			= 'siswa/Aspirasi/index_konseling';
 	$route['siswa/konseling/save'] 		= 'siswa/Aspirasi/save_konseling';
+
+	$route['siswa/akademik/jadwal-pelajaran'] 			= 'siswa/Akademik/jadwal_pelajaran';
+	$route['siswa/akademik/jadwal-pelajaran/pdf'] 	= 'siswa/Akademik/jadwal_pelajaran_pdf';
+	$route['siswa/akademik/nilai-semester'] 				= 'siswa/Akademik/nilai_semester';
+	$route['siswa/akademik/nilai-semester/pdf'] 		= 'siswa/Akademik/nilai_semester_pdf';
+	$route['siswa/akademik/rangkuman-nilai'] 				= 'siswa/Akademik/rangkuman_nilai';
+	$route['siswa/akademik/rangkuman-nilai/pdf'] 		= 'siswa/Akademik/rangkuman_nilai_pdf';
 
 
 $route['404_override'] 					= '';

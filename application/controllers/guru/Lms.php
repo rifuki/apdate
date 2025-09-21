@@ -1,4 +1,4 @@
-<?php
+	<?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Lms extends CI_Controller {
@@ -22,6 +22,7 @@ class Lms extends CI_Controller {
 		$data['subjudul'] = 'Absensi';
 		$data['pertemuan'] = $pertemuan;
 		$data['absensi'] = $absensi;
+		$data['active_periode'] = $active_periode;
 		$this->template->_vGuru('lms/absensi', $data);
 	}
 	
@@ -113,6 +114,7 @@ class Lms extends CI_Controller {
 		$data['subjudul'] = 'Modul';
 		$data['pertemuan'] = $pertemuan;
 		$data['modul'] = $modul;
+		$data['active_periode'] = $active_periode;
 		$this->template->_vGuru('lms/modul', $data);
 	}
 
@@ -211,6 +213,7 @@ class Lms extends CI_Controller {
 		$data['subjudul'] = 'Pranala Luar';
 		$data['pertemuan'] = $pertemuan;
 		$data['pranala_luar'] = $pranala_luar;
+		$data['active_periode'] = $active_periode;
 		$this->template->_vGuru('lms/pranala_luar', $data);
 	}
 
@@ -273,12 +276,12 @@ class Lms extends CI_Controller {
 			return redirect('guru/dashboard');
 		}
 		$diskusi = $this->Lms_model->find_diskusi($pertemuan['id']);
-
 		$data['judul'] = 'LMS';
 		$data['subjudul'] = 'Diskusi';
 		$data['pertemuan'] = $pertemuan;
 		$data['diskusi'] = $diskusi;
 		$data['user']				= $session;
+		$data['active_periode'] = $active_periode;
 		$this->template->_vGuru('lms/diskusi', $data);
 	}
 

@@ -108,9 +108,8 @@ class Kelas extends CI_Controller {
 		$data['action']			= "do_create";
 
 		$tingkat_kelas 	= $this->Dbhelper->selectTabel('id, code, name', 'mt_tingkat_kelas', array(), 'code',' ASC');
-		// Fix: Convert boolean to string for PostgreSQL compatibility
-		$periode 				= $this->Dbhelper->selectTabelOne('id, tahun_ajaran', 'mt_periode', array("is_active" => '1'));
-		$guru 					= $this->Dbhelper->selectTabel('id, nip, nama', 'mt_users_guru', array('is_active' => '1'), 'nip',' ASC');
+		$periode 				= $this->Dbhelper->selectTabelOne('id, tahun_ajaran', 'mt_periode', array("is_active" => 1));
+		$guru 					= $this->Dbhelper->selectTabel('id, nip, nama', 'mt_users_guru', array('is_active' => 1), 'nip',' ASC');
 		$data['tingkat_kelas']	= $tingkat_kelas;
 		$data['periode']	= $periode;
 		$data['guru']	= $guru;
@@ -127,10 +126,9 @@ class Kelas extends CI_Controller {
 			return redirect($this->own_link);
 		}
 		$tingkat_kelas = $this->Dbhelper->selectTabel('id, code, name', 'mt_tingkat_kelas', array("deleted_at" => NULL), 'code', 'ASC');	
-		// Fix: Convert boolean to string for PostgreSQL compatibility
-		$mata_pelajaran = $this->Dbhelper->selectTabel('id, code, name', 'mt_mata_pelajaran', array("is_active" => '1'), 'code', 'ASC');
+		$mata_pelajaran = $this->Dbhelper->selectTabel('id, code, name', 'mt_mata_pelajaran', array("is_active" => 1), 'code', 'ASC');
 		$periode 				= $this->Dbhelper->selectTabelOne('id, tahun_ajaran', 'mt_periode', array("id" => $model->periode_id));
-		$guru 					= $this->Dbhelper->selectTabel('id, nip, nama', 'mt_users_guru', array('is_active' => '1'), 'nip',' ASC');
+		$guru 					= $this->Dbhelper->selectTabel('id, nip, nama', 'mt_users_guru', array('is_active' => 1), 'nip',' ASC');
 		$model_mapel = $this->Kelas_model->find_mapel($id, true);
 		$data['judul'] 			= $this->judul;
 		$data['subjudul'] 		= 'Edit Data';
@@ -175,9 +173,9 @@ class Kelas extends CI_Controller {
 			}
 			// $post_data["updated_at"] = date("Y-m-d H:i:s");
 			unset($post_data["id"]);
-			if ($post_data['is_active'] === '1') {
+			if ($post_data['is_active'] == 1) {
 				$update_all = [
-					"is_active" => FALSE
+					"is_active" => 0
 				];
 				$save = $this->Dbhelper->updateData($this->table, array(), $update_all);
 			}

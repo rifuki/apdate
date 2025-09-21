@@ -8,48 +8,12 @@ class Dashboard extends CI_Controller {
 	}
 
 	public function index() {
-		// $kode_klasifikasi = $this->Dbhelper->selectTabel('id_kk as id, name, description', 'm_arsip_kode_klasifikasi', array("deleted_at" => NULL), 'name', 'ASC');
-		// $arsip = $this->Dbhelper->selectTabel('id_arsip, kode_id', 'm_arsip', array("deleted_at" => NULL), 'kode_id', 'ASC');
-		// $arsip_musnah = $this->Dbhelper->selectTabel('id_musnah, kode_id', 'm_arsip_musnah', array("deleted_at" => NULL), 'kode_id', 'ASC');
-		// $arsip_pembuangan = $this->Dbhelper->selectTabel('id_pembuangan, kode_id', 'm_arsip_pembuangan', array("deleted_at" => NULL), 'kode_id', 'ASC');
-
-		$dashdata = [];
-		// if (!empty($kode_klasifikasi)) {
-		// 	foreach ($kode_klasifikasi as $val) {
-		// 		$id = $val['id'];
-		// 		if (!array_key_exists($id, $dashdata)) {
-		// 			$val['total_data'] = 0;
-		// 			$dashdata[$id] = $val;
-		// 		}
-		// 	}
-		// }
-		// if (!empty($arsip)) {
-		// 	foreach ($arsip as $val) {
-		// 		$kode_id = $val['kode_id'];
-		// 		if (array_key_exists($kode_id, $dashdata)) {
-		// 			$dashdata[$kode_id]['total_data'] += 1;
-		// 		}
-		// 	}
-		// }
-		// if (!empty($arsip_musnah)) {
-		// 	foreach ($arsip_musnah as $val) {
-		// 		$kode_id = $val['kode_id'];
-		// 		if (array_key_exists($kode_id, $dashdata)) {
-		// 			$dashdata[$kode_id]['total_data'] += 1;
-		// 		}
-		// 	}
-		// }
-		// if (!empty($arsip_pembuangan)) {
-		// 	foreach ($arsip_pembuangan as $val) {
-		// 		$kode_id = $val['kode_id'];
-		// 		if (array_key_exists($kode_id, $dashdata)) {
-		// 			$dashdata[$kode_id]['total_data'] += 1;
-		// 		}
-		// 	}
-		// }
+		
+		$informasi = $this->db->order_by('created_at', 'DESC')->get('mt_informasi')->result_array();
+		$data['active_periode'] = active_periode();
+		$data['informasi'] = $informasi;
 		$data['judul'] = 'Dashboard';
 		$data['subjudul'] = 'Index';
-		$data['kode_klasifikasi'] = $dashdata;
 		$this->template->_v('index', $data);
 	}
 

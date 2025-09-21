@@ -11,7 +11,7 @@
         <h3 class="card-title">Data <?php echo $judul ?></h3>
       </div>
       <div class="card-body">
-        <form id="frm-filter" action="<?= base_url('guru/laporan/penilaian') ?>" method="POST">
+        <form id="frm-filter" action="<?= base_url('guru/laporan-penilaian') ?>" method="POST">
           <div class="form-group row">
             <label for="periode_data" class="col-lg-2 col-sm-12 col-form-label">Periode Aktif</label>
             <div class="col-lg-6 col-sm-12">
@@ -34,7 +34,6 @@
           </div>
         </form>
         <br>
-        <?php $is_final = 0; ?>
         <div class="row">
           <div id="rowSiswa" class="col-md-12">
             <div class="table-responsive mt-5">
@@ -50,7 +49,6 @@
                   <form id="frm-penilaian">
                     <?php if (!empty($list_penilaian)): ?>
                       <?php foreach ($list_penilaian as $row): ?>
-                        <?php $is_final = $row['is_final'] == 1 ? 1 : $is_final; ?>
                         <tr>
                           <td><?= htmlspecialchars($row['nisn']) ?></td>
                           <td><?= htmlspecialchars($row['nama']) ?></td>
@@ -114,7 +112,7 @@
 
 <script type="text/javascript">
   function cekDetail(siswa_id, jadwal_id) {
-    var url = "<?= base_url('guru/laporan/penilaian_detail') ?>";
+    var url = "<?= base_url('guru/laporan-penilaian/detail') ?>";
     $("#rowSiswa").removeClass('col-md-6');
     $("#rowSiswa").addClass('col-md-12');
     $("#rowDetail").empty();
@@ -126,29 +124,14 @@
           "jadwal_id": jadwal_id
         },
         dataType : "json",
-        success:function(response)
+        complete:function(result)
         {
+          let response = result.responseJSON;
+          console.log(response);
             if (response.status) {
               $("#rowSiswa").addClass('col-md-6');
               $("#rowSiswa").removeClass('col-md-12');
               $("#rowDetail").html(response.data.view);
-              // let dataJadwal = response.data.list;
-
-              // let html_jadwal = dataJadwal.map(function(item, i) {
-              //   console.log(item, item.pertemuan_ke);
-              //   let buttonTugas = item.tugas ? `<button class="btn btn-success btn-sm" onclick="lihatTugas('${item.tugas}')">Lihat Tugas</button>` : '<span class="text-muted">-</span>';
-              //   let buttonAbsensi = item.absensi ? `<button class="btn btn-success btn-sm" onclick="lihatAbsensi('${item.absensi}')">Lihat Absensi</button>` : '<span class="text-muted">-</span>';
-              //   return `
-              //     <tr>
-              //       <td>${item.pertemuan_ke}</td>
-              //       <td>${buttonAbsensi}</td>
-              //       <td>${buttonAbsensi}</td>
-              //       <td>${buttonTugas}</td>
-              //     </tr>
-              //   `;
-              // });
-              // console.log(html_jadwal);
-              // $("#table-detail").html(html_jadwal);
               return toastSuccess(response.message);
             }
             return toastError(response.message);
@@ -219,16 +202,83 @@
       formData.append(`absensi[${siswa_id}_${pertemuan_id}]`, status_kehadiran);
     });
 
-    fetch("<?= base_url('guru/laporan/do_penilaian') ?>", {
+    formData.append('jadwal_kelas_id', $("#frm_jadwal_id").val());
+
+    fetch("<?= base_url('guru/laporan-penilaian/do_penilaian') ?>", {
         method: 'POST',
         body: formData
     })
     .then(response => response.json()) // jika kamu kirim JSON, sesuaikan
     .then(data => {
-      // if (data.status) {
-      //   $('#tugasDetailBody').html(data.data.html);
-      //   $('#modalTugasDetail').modal('show');
-      // }
+      if (!data.status) {
+        return toastError(data.message);
+      }
+      return toastSuccess(data.message);
+    })
+    .catch(error => {
+        console.error('Gagal:', error);
+        return toastError('Gagal mencari data!');
+    });
+  }
+
+  function downloadTemplate() {
+    let jadwal_id = $("#frm_jadwal_id").val();
+    let siswa_id = $("#frm_siswa_id").val();
+    if (!jadwal_id || !siswa_id) {
+      return toastError('Silahkan pilih kelas dan siswa terlebih dahulu!');
+    }
+    
+    let formData = new FormData();
+    formData.append('jadwal_id', jadwal_id);
+    formData.append('siswa_id', siswa_id);
+
+    fetch("<?= base_url('guru/laporan-penilaian/detail_export') ?>", {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        // Ekstrak nama file dari header (jika disediakan)
+        const disposition = response.headers.get('Content-Disposition');
+        let filename = "template.xlsx";
+        if (disposition && disposition.includes("filename=")) {
+            filename = disposition.split("filename=")[1].replace(/"/g, '');
+        }
+
+        return response.blob().then(blob => {
+            // Buat link download
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+
+            toastSuccess('Sukses download template!');
+        });
+    })
+    .catch(error => {
+        console.error('Gagal:', error);
+        toastError('Gagal download template!');
+    });
+  }
+
+  function importNilai() {
+    let formData = new FormData(document.getElementById('frm-import-nilai'));
+    fetch("<?= base_url('guru/laporan-penilaian/detail_import') ?>", {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json()) // jika kamu kirim JSON, sesuaikan
+    .then(data => {
+      if (!data.status) {
+        return toastError(data.message);
+      }
       return toastSuccess(data.message);
     })
     .catch(error => {

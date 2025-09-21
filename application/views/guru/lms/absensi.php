@@ -10,6 +10,7 @@
       <div class="card-header">
         <h3 class="card-title">Data <?php echo $judul ?></h3>
       </div>
+      <?php $readonly = in_array($active_periode['status_code'], ['2', '2.1']) ? "" : "readonly"; ?>
       <div class="card-body">
         <div class="row">
           <div class="col-12">
@@ -38,7 +39,7 @@
                             <td><?= htmlspecialchars($a['nama']) ?></td>
                             <td><?= htmlspecialchars($a['nisn']) ?></td>
                             <td>
-                              <select data-siswaid="<?= $a['siswa_id'] ?>" class="form-control absensi-kehadiran">
+                              <select data-siswaid="<?= $a['siswa_id'] ?>" class="form-control absensi-kehadiran" <?= $readonly ?>>
                                 <option value="" disabled selected>Belum Absen</option>
                                 <option value="hadir" <?= $a['absensi_kehadiran'] == 'hadir' ? 'selected' : '' ?>>Hadir</option>
                                 <option value="tanpa_keterangan" <?= $a['absensi_kehadiran'] == 'tanpa_keterangan' ? 'selected' : '' ?>>Tanpa Keterangan</option>
@@ -61,7 +62,7 @@
                               <?php endif; ?>
                             </td>
                             <td>
-                              <input type="text" onkeypress="javascript:return isNumber(event)" class="form-control nilai-tugas" data-siswaid="<?= $a['siswa_id'] ?>" placeholder="0" value="<?= $a['nilai_tugas'] ?>">
+                              <input type="number" min="0" max="100" class="form-control nilai-tugas" data-siswaid="<?= $a['siswa_id'] ?>" placeholder="0" value="<?= $a['nilai_tugas'] ?>" <?= $readonly ?>>
                             </td>
                           </tr>
                         <?php endforeach; ?>
@@ -71,9 +72,9 @@
                     </tbody>
                   </table>
                 </div>
+                <?php if (empty($readonly)): ?>
                 <button type="button" class="btn btn-success mb-2" id="btnSimpanData">Simpan Data</button>
-                <br>
-                <strong style="font-size: 14px">*Absensi Diskusi akan dianggap hadir jika mengirim 2x diskusi tiap pertemuan</strong>
+                <?php endif ?>
               </div>
             </div>
           </div>

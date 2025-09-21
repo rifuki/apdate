@@ -16,13 +16,13 @@
           <div class="form-group row">
             <label for="inputEmail3" class="col-lg-2 col-sm-12 col-form-label">Username</label>
             <div class="col-lg-10 col-sm-12">
-              <input type="text" name="username" class="form-control" autocomplete="off" value="<?php echo isset($model)?$model->username:""; ?>" required>
+              <input type="text" name="username" class="form-control" autocomplete="off" value="<?php echo isset($model)?$model->username:""; ?>" readonly>
             </div>
           </div>
           <div class="form-group row">
             <label for="inputEmail3" class="col-lg-2 col-sm-12 col-form-label">Email</label>
             <div class="col-lg-10 col-sm-12">
-              <input type="email" name="email" class="form-control" autocomplete="off" value="<?php echo isset($model)?$model->email:""; ?>">
+              <input type="email" name="email" class="form-control" autocomplete="off" value="<?php echo isset($model)?$model->email:""; ?>" required>
             </div>
           </div>
           <hr>

@@ -30,7 +30,7 @@
       <div id="collapse<?= $i ?>" class="collapse" aria-labelledby="heading<?= $i ?>" data-parent="#accordionContoh">
         <div class="card-body">
           <div class="mb-2">
-            <?php if($status == 'belum' || $status == 'tutup'): ?>
+            <?php if(($status == 'belum' || $status == 'tutup') && $active_periode['status_code'] == '2'): ?>
               <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#modalAktifkanPertemuan" data-id="<?= $slug ?>" data-pertemuan="<?= $i ?>">Aktifkan Pertemuan</button>
             <?php elseif($status == 'aktif'): ?>
               <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#modalTutupPertemuan" data-id="<?= $slug ?>" data-pertemuan="<?= $i ?>">Tutup Pertemuan</button>

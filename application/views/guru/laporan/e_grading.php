@@ -10,6 +10,7 @@
       <div class="card-header">
         <h3 class="card-title">Data <?php echo $judul ?></h3>
       </div>
+      <?php $readonly = in_array($active_periode['status_code'], ['2', '2.1']) ? "" : "readonly"; ?>
       <div class="card-body">
         <form id="frm-filter" action="<?= base_url('guru/e-grading') ?>" method="POST">
           <div class="form-group row">
@@ -35,7 +36,52 @@
         </form>
         <br>
         <div class="row">
-          <div class="col-md-6">
+          <div class="col-md-12">
+            <form id="frm-penilaian">
+              <div class="table-responsive mt-5">
+                <table class="table table-bordered table-striped">
+                  <thead>
+                    <tr>
+                      <th width="20%">Siswa</th>
+                      <th width="10%">Absensi</th>
+                      <th width="10%">Tugas</th>
+                      <th width="10%">UTS</th>
+                      <th width="10%">UAS</th>
+                      <th width="15%">Nilai Akhir</th>
+                      <th width="10%">Grade</th>
+                      <th width="25%">Keterangan</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                      <?php if (!empty($list_penilaian)): ?>
+                        <?php foreach ($list_penilaian as $row): ?>
+                          <tr>
+                            <td><?= $row['nisn'].' - '.$row['nama'] ?></td>
+                            <td><?= htmlspecialchars($row['absensi_kehadiran']) ?></td>
+                            <td><?= htmlspecialchars($row['nilai_tugas']) ?></td>
+                            <td><?= htmlspecialchars($row['nilai_uts']) ?></td>
+                            <td><?= htmlspecialchars($row['nilai_uas']) ?></td>
+                            <td><input type="number" min="0" max="100" name="nilai_grade[]" data-siswaid="<?= $row['siswa_id'] ?>" class="form-control nilai_akhir" value="<?= $row['nilai_akhir'] ?>" <?= $readonly ?>></td>
+                            <td><?= $row['grade'] ?></td>
+                            <td><?= $row['keterangan'] ?></td>
+                          </tr>
+                        <?php endforeach; ?>
+                      <?php else: ?>
+                        <tr>
+                          <td colspan="8" class="text-center">Data tidak ditemukan.</td>
+                        </tr>
+                      <?php endif; ?>
+                  </tbody>
+                </table>
+              </div>
+              <?php if(!empty($list_penilaian) && $readonly == ""): ?>
+              <button type="submit" class="btn btn-info btn-flat">Simpan Pengaturan</button>
+              <?php endif ?>
+            </form>
+            <br>
+            <strong style="font-size: 14px">*Grade akan otomatis berubah setelah menginput nilai dan submit formnya</strong>
+          </div>
+          <div class="col-md-12">
             <div class="table-responsive mt-2">
               <table class="table table-bordered table-striped">
                 <thead>
@@ -67,43 +113,6 @@
               </table>
             </div>
           </div>
-          <div class="col-md-12">
-            <form id="frm-penilaian">
-            <div class="table-responsive mt-5">
-              <table class="table table-bordered table-striped">
-                <thead>
-                  <tr>
-                    <th width="15%">NISN</th>
-                    <th width="25%">Nama Siswa</th>
-                    <th width="15%">Nilai Akhir</th>
-                    <th width="15%">Grade</th>
-                    <th width="30%">Keterangan</th>
-                  </tr>
-                </thead>
-                <tbody>
-                    <?php if (!empty($list_penilaian)): ?>
-                      <?php foreach ($list_penilaian as $row): ?>
-                        <tr>
-                          <td><?= htmlspecialchars($row['nisn']) ?></td>
-                          <td><?= htmlspecialchars($row['nama']) ?></td>
-                          <td><input type="number" min="0" max="100" name="nilai_grade[]" data-siswaid="<?= $row['siswa_id'] ?>" class="form-control nilai_akhir" value="<?= $row['nilai_akhir'] ?>"></td>
-                          <td><?= $row['grade'] ?></td>
-                          <td><?= $row['keterangan'] ?></td>
-                        </tr>
-                      <?php endforeach; ?>
-                    <?php else: ?>
-                      <tr>
-                        <td colspan="5" class="text-center">Data tidak ditemukan.</td>
-                      </tr>
-                    <?php endif; ?>
-                </tbody>
-              </table>
-            </div>
-            <button type="submit" class="btn btn-info btn-flat">Simpan Pengaturan</button>
-            </form>
-            <br>
-            <strong style="font-size: 14px">*Grade akan otomatis berubah setelah menginput nilai dan submit formnya</strong>
-          </div>
         </div>
       </div>
     </div>
@@ -131,23 +140,6 @@
               $("#rowSiswa").addClass('col-md-6');
               $("#rowSiswa").removeClass('col-md-12');
               $("#rowDetail").html(response.data.view);
-              // let dataJadwal = response.data.list;
-
-              // let html_jadwal = dataJadwal.map(function(item, i) {
-              //   console.log(item, item.pertemuan_ke);
-              //   let buttonTugas = item.tugas ? `<button class="btn btn-success btn-sm" onclick="lihatTugas('${item.tugas}')">Lihat Tugas</button>` : '<span class="text-muted">-</span>';
-              //   let buttonAbsensi = item.absensi ? `<button class="btn btn-success btn-sm" onclick="lihatAbsensi('${item.absensi}')">Lihat Absensi</button>` : '<span class="text-muted">-</span>';
-              //   return `
-              //     <tr>
-              //       <td>${item.pertemuan_ke}</td>
-              //       <td>${buttonAbsensi}</td>
-              //       <td>${buttonAbsensi}</td>
-              //       <td>${buttonTugas}</td>
-              //     </tr>
-              //   `;
-              // });
-              // console.log(html_jadwal);
-              // $("#table-detail").html(html_jadwal);
               return toastSuccess(response.message);
             }
             return toastError(response.message);
@@ -173,15 +165,16 @@
     })
     .then(response => response.json()) // jika kamu kirim JSON, sesuaikan
     .then(data => {
-      // if (data.status) {
-      //   $('#tugasDetailBody').html(data.data.html);
-      //   $('#modalTugasDetail').modal('show');
-      // }
-      return toastSuccess(data.message);
+      if (data.status) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+        return toastSuccess(data.message);
+      }
+      return toastError(data.message);
     })
     .catch(error => {
-        console.error('Gagal:', error);
-        return toastError('Gagal update data!');
+        return toastError(error.message);
     });
   });
 </script>

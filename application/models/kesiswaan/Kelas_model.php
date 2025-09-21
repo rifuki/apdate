@@ -11,7 +11,7 @@
 		}
 
 		private function _get_datatables_query($filter = []) {
-			$this->db->select("tref_kelas.id, tref_kelas.kelas, COALESCE(mt_users_guru.nip, '') || ' - ' || COALESCE(mt_users_guru.nama, '') as wali_kelas");
+			$this->db->select("tref_kelas.id, tref_kelas.kelas, CONCAT(IFNULL(mt_users_guru.nip, ''), ' - ', IFNULL(mt_users_guru.nama, '')) as wali_kelas");
 			$this->db->from($this->table);
 			$this->db->join('mt_users_guru', $this->table.'.guru_id = mt_users_guru.id');
 			$i = 0;  
@@ -96,8 +96,7 @@
 
 		public function find_active_periode() {
 			$this->db->from('mt_periode');
-			// Fix: Convert boolean to string for PostgreSQL compatibility
-			$this->db->where('is_active', '1');
+			$this->db->where('is_active', 1);
 			$query = $this->db->get();
 
 			return $query->row();
@@ -149,13 +148,13 @@
 				$newStudent = $this->db->select('a.id, a.nisn, a.nama, a.current_kelas_id')
 					->from('mt_users_siswa as a')
 					->where('a.current_kelas_id', NULL)
+					->where_in('a.status_siswa', ['baru', 'tinggal_kelas_7'])
 					->get()->result_array();
 				$currentStudent = $this->db->select('a.id, a.nisn, a.nama')
 					->from('mt_users_siswa as a')
 					->join('tref_kelas_siswa as b', 'a.id = b.siswa_id')
 					->where('a.current_kelas_id', $kelasID)
 					->where('b.kelas_id', $kelasID)
-					->where('b.status', enumSiswaKelas('A'))
 					->order_by('b.updated_at', 'DESC')
 					->get()->result_array();
 				$result["new"] 			= $newStudent;
@@ -163,17 +162,30 @@
 			} elseif ($tingkatKelasID == 8 && !empty($kelasID)) {
 				$newStudent = $this->db->select('a.id, a.nisn, a.nama, a.current_kelas_id')
 					->from('mt_users_siswa as a')
-					->join('tref_kelas_siswa as b', 'a.id = b.siswa_id', 'left')
-					->where_in('b.status', [enumSiswaKelas('D'), enumSiswaKelas('E')])
-					->where('a.current_kelas_id !=', NULL)
-					->or_where('a.current_kelas_id', NULL, FALSE)
+					->where('a.current_kelas_id', NULL)
+					->where_in('a.status_siswa', ['baru', 'tinggal_kelas_8', 'naik_kelas_8'])
 					->get()->result_array();
 				$currentStudent = $this->db->select('a.id, a.nisn, a.nama')
 					->from('mt_users_siswa as a')
 					->join('tref_kelas_siswa as b', 'a.id = b.siswa_id')
 					->where('a.current_kelas_id', $kelasID)
 					->where('b.kelas_id', $kelasID)
-					->where('b.status', enumSiswaKelas('A'))
+					->order_by('b.updated_at', 'DESC')
+					->get()->result_array();
+				$result["new"] 			= $newStudent;
+				$result["current"]	= $currentStudent;
+				// dd($newStudent);
+			} elseif ($tingkatKelasID == 9 && !empty($kelasID)) {
+				$newStudent = $this->db->select('a.id, a.nisn, a.nama, a.current_kelas_id')
+					->from('mt_users_siswa as a')
+					->where('a.current_kelas_id', NULL)
+					->where_in('a.status_siswa', ['baru', 'tinggal_kelas_9', 'naik_kelas_9'])
+					->get()->result_array();
+				$currentStudent = $this->db->select('a.id, a.nisn, a.nama')
+					->from('mt_users_siswa as a')
+					->join('tref_kelas_siswa as b', 'a.id = b.siswa_id')
+					->where('a.current_kelas_id', $kelasID)
+					->where('b.kelas_id', $kelasID)
 					->order_by('b.updated_at', 'DESC')
 					->get()->result_array();
 				$result["new"] 			= $newStudent;
@@ -237,7 +249,11 @@
 			return $result;
 		}
 
-		public function listKelasJadwalSemester($semester_id) {
+		public function listKelasJadwalSemester($semester_id, $tingkat_kelas_code = "") {
+			$whereAdd = "";
+			if (!empty($tingkat_kelas_code)) {
+				$whereAdd = " AND d.code = '$tingkat_kelas_code'";
+			}
 			$query = "
 				SELECT 
 					a.*, 
@@ -246,8 +262,10 @@
 				FROM tref_kelas_jadwal_pelajaran AS a
 				INNER JOIN tref_kelas AS b ON a.kelas_id = b.id
 				INNER JOIN mt_mata_pelajaran AS c ON a.mata_pelajaran_id = c.id
+				INNER JOIN mt_tingkat_kelas AS d ON b.tingkat_kelas_id = d.id
 				WHERE
 					a.semester_id = ?
+					$whereAdd
 			";
 			$result = $this->db->query($query, [$semester_id])->result_array();
 			return $result;

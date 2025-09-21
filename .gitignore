@@ -27,16 +27,3 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 *.stTheme.cache
 *.sublime-workspace
 *.sublime-project
-
-# Environment files
-.env
-.env.local
-.env.*.local
-.env.production
-
-# Docker
-.docker/
-
-# Upload directory
-upload/*
-!upload/.htaccess

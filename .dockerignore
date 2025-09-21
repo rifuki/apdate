@@ -1,26 +1,46 @@
-# APDATE - Docker ignore file
+# Git
 .git
-.github
-*.md
+.gitignore
+.gitattributes
+
+# Documentation
 README.md
-RAILWAY_DEPLOYMENT.md
-SUPABASE_DEPLOYMENT.md
-.env.example
-.env.supabase
-clear_session.php
-init-database.sql
-database.sql
+contributing.md
 
 # Development files
-.vscode
-.idea
 *.log
 *.tmp
-
-# OS files
 .DS_Store
 Thumbs.db
 
-# Dependencies that will be installed in container
-vendor/
-node_modules/
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Node modules (if any)
+node_modules
+npm-debug.log
+
+# Composer
+vendor/composer/installed.json
+
+# Application logs and cache
+application/logs/*
+application/cache/*
+!application/logs/.htaccess
+!application/cache/.htaccess
+
+# Upload directory (will be mounted as volume)
+upload/*
+!upload/.htaccess
+
+# Temporary files
+*.tmp
+*.temp
+
+# Docker files
+Dockerfile
+docker-compose.yml
+.dockerignore
