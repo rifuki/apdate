@@ -1,8 +1,7 @@
 # Docker Deployment Guide
 
 ## Prerequisites
-- Docker
-- Docker Compose
+- Docker (with Compose plugin included)
 
 ## Quick Start
 
@@ -20,7 +19,7 @@
 
 3. **Start services**
    ```bash
-   docker-compose up -d
+   docker compose up -d
    ```
 
 4. **Access application**
@@ -70,17 +69,17 @@ Key variables in docker-compose.yml:
 
 ```bash
 # Start services
-docker-compose up -d
+docker compose up -d
 
 # View logs
-docker-compose logs -f app
+docker compose logs -f app
 
 # Stop services
-docker-compose down
+docker compose down
 
 # Rebuild application
-docker-compose build app
-docker-compose up -d app
+docker compose build app
+docker compose up -d app
 
 # Database backup
 docker exec apdate-db mysqldump -u root -proot_password apdate > backup.sql
@@ -107,10 +106,10 @@ sudo chmod -R 755 upload/
 
 **Database connection:**
 - Ensure DB_HOST=db in environment
-- Check docker-compose services are running
+- Check docker compose services are running
 
 **View container logs:**
 ```bash
-docker-compose logs app
-docker-compose logs db
+docker compose logs app
+docker compose logs db
 ```

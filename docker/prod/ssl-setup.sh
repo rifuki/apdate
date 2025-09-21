@@ -11,22 +11,33 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Configuration
-EMAIL="your-email@example.com"
-MAIN_DOMAIN="example.com"
-PHPMYADMIN_DOMAIN="phpmyadmin.example.com"
+# Load environment variables from .env file
+if [[ -f ".env" ]]; then
+    export $(grep -v '^#' .env | xargs)
+    echo -e "${GREEN}✓ Loaded configuration from .env file${NC}"
+else
+    echo -e "${RED}ERROR: .env file not found!${NC}"
+    echo "Please copy .env.production.example to .env and configure your domains:"
+    echo "cp .env.production.example .env"
+    exit 1
+fi
+
+# Get configuration from environment variables
+EMAIL="${SMTP_USER:-your-email@example.com}"
+MAIN_DOMAIN="${MAIN_DOMAIN:-example.com}"
+PHPMYADMIN_DOMAIN="${PHPMYADMIN_DOMAIN:-phpmyadmin.example.com}"
 
 echo -e "${GREEN}=== APDATE SSL Setup ===${NC}"
 echo -e "${YELLOW}This script will set up SSL certificates for your domains${NC}"
 echo ""
 
-# Check if domains are set
-if [[ "$MAIN_DOMAIN" == "example.com" ]]; then
-    echo -e "${RED}ERROR: Please edit this script and set your actual domains!${NC}"
-    echo "Edit the following variables in this script:"
-    echo "- EMAIL: Your email for Let's Encrypt"
-    echo "- MAIN_DOMAIN: Your main domain (e.g., myapp.com)"
-    echo "- PHPMYADMIN_DOMAIN: Your phpMyAdmin subdomain (e.g., admin.myapp.com)"
+# Check if domains are configured
+if [[ "$MAIN_DOMAIN" == "example.com" ]] || [[ -z "$MAIN_DOMAIN" ]]; then
+    echo -e "${RED}ERROR: Please configure your domains in .env file!${NC}"
+    echo "Required variables in .env:"
+    echo "- MAIN_DOMAIN=yourdomain.com"
+    echo "- PHPMYADMIN_DOMAIN=admin.yourdomain.com"
+    echo "- SMTP_USER=your-email@gmail.com (for Let's Encrypt)"
     exit 1
 fi
 
@@ -88,8 +99,8 @@ fi
 
 # Start services without SSL first
 echo -e "${YELLOW}=== Starting services for certificate generation ===${NC}"
-docker-compose -f docker-compose.prod.yml down
-docker-compose -f docker-compose.prod.yml up -d nginx
+docker compose -f docker-compose.prod.yml down
+docker compose -f docker-compose.prod.yml up -d nginx
 
 # Wait for nginx to be ready
 echo "Waiting for nginx to be ready..."
@@ -97,7 +108,7 @@ sleep 10
 
 # Get certificates for main domain
 echo -e "${YELLOW}=== Getting SSL certificate for $MAIN_DOMAIN ===${NC}"
-docker-compose -f docker-compose.prod.yml run --rm certbot \
+docker compose -f docker-compose.prod.yml run --rm certbot \
     certonly --webroot --webroot-path=/var/www/certbot \
     --email $EMAIL \
     --agree-tos \
@@ -107,7 +118,7 @@ docker-compose -f docker-compose.prod.yml run --rm certbot \
 
 # Get certificates for phpMyAdmin domain
 echo -e "${YELLOW}=== Getting SSL certificate for $PHPMYADMIN_DOMAIN ===${NC}"
-docker-compose -f docker-compose.prod.yml run --rm certbot \
+docker compose -f docker-compose.prod.yml run --rm certbot \
     certonly --webroot --webroot-path=/var/www/certbot \
     --email $EMAIL \
     --agree-tos \
@@ -121,8 +132,8 @@ sed -i "s/phpmyadmin.example.com/$PHPMYADMIN_DOMAIN/g" docker/prod/sites/apdate.
 
 # Restart services with SSL
 echo -e "${YELLOW}=== Restarting services with SSL ===${NC}"
-docker-compose -f docker-compose.prod.yml down
-docker-compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml down
+docker compose -f docker-compose.prod.yml up -d
 
 echo -e "${GREEN}=== SSL Setup Complete! ===${NC}"
 echo ""
@@ -132,7 +143,7 @@ echo "phpMyAdmin: https://$PHPMYADMIN_DOMAIN"
 echo ""
 echo -e "${YELLOW}Important notes:${NC}"
 echo "1. Certificates will auto-renew every 12 hours"
-echo "2. Check logs: docker-compose -f docker-compose.prod.yml logs nginx"
-echo "3. Restart nginx after any config changes: docker-compose -f docker-compose.prod.yml restart nginx"
+echo "2. Check logs: docker compose -f docker-compose.prod.yml logs nginx"
+echo "3. Restart nginx after any config changes: docker compose -f docker-compose.prod.yml restart nginx"
 echo ""
 echo -e "${GREEN}Setup completed successfully!${NC}"

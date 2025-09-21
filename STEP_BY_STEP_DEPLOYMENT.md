@@ -45,16 +45,13 @@ sudo usermod -aG docker $USER
 docker --version
 ```
 
-### 1.4 Install Docker Compose
+### 1.4 Verify Docker Compose
 ```bash
-# Download Docker Compose
-sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+# Docker Compose is now included as a plugin with Docker
+# No separate installation needed
 
-# Make executable
-sudo chmod +x /usr/local/bin/docker-compose
-
-# Verify
-docker-compose --version
+# Verify Docker Compose is available
+docker compose version
 ```
 
 ### 1.5 Setup Firewall (Optional tapi Recommended)
@@ -146,7 +143,7 @@ cd /home/apdate
 ### 4.1 Copy Environment Template
 ```bash
 cd /path/to/apdate
-cp .env.production .env
+cp .env.production.example .env
 ```
 
 ### 4.2 Edit Konfigurasi Production
@@ -186,20 +183,7 @@ openssl rand -base64 32
 head /dev/urandom | tr -dc A-Za-z0-9 | head -c 32
 ```
 
-### 4.3 Edit SSL Setup Script
-```bash
-nano docker/prod/ssl-setup.sh
-```
-
-Edit bagian ini:
-```bash
-# Configuration
-EMAIL="your-email@gmail.com"        # Email untuk Let's Encrypt
-MAIN_DOMAIN="myapp.com"              # Domain utama
-PHPMYADMIN_DOMAIN="admin.myapp.com"  # Domain phpMyAdmin
-```
-
-### 4.4 Make Script Executable
+### 4.3 Make Script Executable (No need to edit script - it reads from .env!)
 ```bash
 chmod +x docker/prod/ssl-setup.sh
 ```
@@ -210,8 +194,8 @@ chmod +x docker/prod/ssl-setup.sh
 
 ### 5.1 Test Configuration
 ```bash
-# Test docker-compose config
-docker-compose -f docker-compose.prod.yml config
+# Test docker compose config
+docker compose -f docker-compose.prod.yml config
 
 # Should show no errors
 ```
@@ -232,17 +216,17 @@ Script ini akan:
 ### 5.3 Manual Deployment (jika script bermasalah)
 ```bash
 # Build dan start services
-docker-compose -f docker-compose.prod.yml build
-docker-compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml build
+docker compose -f docker-compose.prod.yml up -d
 
 # Get SSL certificates manual
-docker-compose -f docker-compose.prod.yml run --rm certbot \
+docker compose -f docker-compose.prod.yml run --rm certbot \
     certonly --webroot --webroot-path=/var/www/certbot \
     --email your-email@gmail.com \
     --agree-tos --no-eff-email \
     -d myapp.com -d www.myapp.com
 
-docker-compose -f docker-compose.prod.yml run --rm certbot \
+docker compose -f docker-compose.prod.yml run --rm certbot \
     certonly --webroot --webroot-path=/var/www/certbot \
     --email your-email@gmail.com \
     --agree-tos --no-eff-email \
@@ -253,7 +237,7 @@ sed -i 's/example.com/myapp.com/g' docker/prod/sites/apdate.conf
 sed -i 's/phpmyadmin.example.com/admin.myapp.com/g' docker/prod/sites/apdate.conf
 
 # Restart with SSL
-docker-compose -f docker-compose.prod.yml restart
+docker compose -f docker-compose.prod.yml restart
 ```
 
 ---
@@ -263,7 +247,7 @@ docker-compose -f docker-compose.prod.yml restart
 ### 6.1 Check Services Running
 ```bash
 # Check all containers
-docker-compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.prod.yml ps
 
 # Should show all services as "Up"
 ```
@@ -303,13 +287,13 @@ curl -I https://admin.myapp.com
 ### 6.5 Check Logs
 ```bash
 # Application logs
-docker-compose -f docker-compose.prod.yml logs app
+docker compose -f docker-compose.prod.yml logs app
 
 # Nginx logs
-docker-compose -f docker-compose.prod.yml logs nginx
+docker compose -f docker-compose.prod.yml logs nginx
 
 # Database logs
-docker-compose -f docker-compose.prod.yml logs db
+docker compose -f docker-compose.prod.yml logs db
 ```
 
 ---
@@ -322,24 +306,24 @@ docker-compose -f docker-compose.prod.yml logs db
 git pull origin main
 
 # Rebuild and restart
-docker-compose -f docker-compose.prod.yml build
-docker-compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml build
+docker compose -f docker-compose.prod.yml up -d
 ```
 
 ### Database Backup
 ```bash
 # Backup database
-docker-compose -f docker-compose.prod.yml exec db mysqldump -u root -p"$DB_PASS" apdate > backup_$(date +%Y%m%d).sql
+docker compose -f docker-compose.prod.yml exec db mysqldump -u root -p"$DB_PASS" apdate > backup_$(date +%Y%m%d).sql
 
 # Restore backup
-docker-compose -f docker-compose.prod.yml exec -i db mysql -u root -p"$DB_PASS" apdate < backup_20231215.sql
+docker compose -f docker-compose.prod.yml exec -i db mysql -u root -p"$DB_PASS" apdate < backup_20231215.sql
 ```
 
 ### SSL Certificate Renewal (automatic)
 ```bash
 # Certificates auto-renew every 12 hours via cron job in container
 # Manual renewal:
-docker-compose -f docker-compose.prod.yml run --rm certbot renew
+docker compose -f docker-compose.prod.yml run --rm certbot renew
 ```
 
 ### Monitor Resources
@@ -361,10 +345,10 @@ free -h
 ### SSL Certificate Issues
 ```bash
 # Check certificates exist
-docker-compose -f docker-compose.prod.yml exec nginx ls -la /etc/letsencrypt/live/
+docker compose -f docker-compose.prod.yml exec nginx ls -la /etc/letsencrypt/live/
 
 # Regenerate certificates
-docker-compose -f docker-compose.prod.yml run --rm certbot delete
+docker compose -f docker-compose.prod.yml run --rm certbot delete
 ./docker/prod/ssl-setup.sh
 ```
 
@@ -375,16 +359,16 @@ dig myapp.com @8.8.8.8
 nslookup myapp.com
 
 # Check nginx config
-docker-compose -f docker-compose.prod.yml exec nginx nginx -t
+docker compose -f docker-compose.prod.yml exec nginx nginx -t
 ```
 
 ### Database Connection Issues
 ```bash
 # Check database variables
-docker-compose -f docker-compose.prod.yml exec app env | grep DB_
+docker compose -f docker-compose.prod.yml exec app env | grep DB_
 
 # Test database connection
-docker-compose -f docker-compose.prod.yml exec app php -r "
+docker compose -f docker-compose.prod.yml exec app php -r "
 \$conn = new mysqli(getenv('DB_HOST'), getenv('DB_USER'), getenv('DB_PASS'), getenv('DB_NAME'));
 echo \$conn->connect_error ? 'Failed: '.\$conn->connect_error : 'Connected successfully';
 "
@@ -393,11 +377,11 @@ echo \$conn->connect_error ? 'Failed: '.\$conn->connect_error : 'Connected succe
 ### Application 500 Errors
 ```bash
 # Check application logs
-docker-compose -f docker-compose.prod.yml logs app
+docker compose -f docker-compose.prod.yml logs app
 
 # Check file permissions
-docker-compose -f docker-compose.prod.yml exec app ls -la upload/
-docker-compose -f docker-compose.prod.yml exec app ls -la application/logs/
+docker compose -f docker-compose.prod.yml exec app ls -la upload/
+docker compose -f docker-compose.prod.yml exec app ls -la application/logs/
 ```
 
 ---

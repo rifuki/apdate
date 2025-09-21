@@ -38,9 +38,8 @@ curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
 sudo usermod -aG docker $USER
 
-# Install Docker Compose
-sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
+# Verify Docker Compose (included with Docker)
+docker compose version
 
 # Reboot untuk apply group changes
 sudo reboot
@@ -63,7 +62,7 @@ git clone <your-repo>
 cd apdate
 
 # Setup production environment
-cp .env.production .env
+cp .env.production.example .env
 
 # Edit konfigurasi (WAJIB!)
 nano .env
@@ -88,22 +87,21 @@ SMTP_USER=youremail@gmail.com
 ### 4. Setup SSL & Deploy
 
 ```bash
-# Edit SSL script dengan domain Anda
-nano docker/prod/ssl-setup.sh
-# Update EMAIL, MAIN_DOMAIN, PHPMYADMIN_DOMAIN
+# Make script executable (script automatically reads from .env)
+chmod +x docker/prod/ssl-setup.sh
 
 # Jalankan setup SSL otomatis
 ./docker/prod/ssl-setup.sh
 
 # Atau manual jika ada issue:
-docker-compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml up -d
 ```
 
 ## 🔧 File Structure Production
 
 ```
 docker-compose.prod.yml     # Production compose
-.env.production            # Production environment template
+.env.production.example    # Production environment template
 docker/prod/
 ├── nginx.conf             # Main nginx config
 ├── sites/apdate.conf      # Site-specific config
@@ -158,35 +156,35 @@ location / {
 ### Start Production
 ```bash
 # Full deployment
-docker-compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml up -d
 
 # Check status
-docker-compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.prod.yml ps
 
 # View logs
-docker-compose -f docker-compose.prod.yml logs -f
+docker compose -f docker-compose.prod.yml logs -f
 ```
 
 ### SSL Management
 ```bash
 # Manual SSL renewal
-docker-compose -f docker-compose.prod.yml run --rm certbot renew
+docker compose -f docker-compose.prod.yml run --rm certbot renew
 
 # Check certificates
-docker-compose -f docker-compose.prod.yml exec nginx ls -la /etc/letsencrypt/live/
+docker compose -f docker-compose.prod.yml exec nginx ls -la /etc/letsencrypt/live/
 ```
 
 ### Maintenance
 ```bash
 # Update application
-docker-compose -f docker-compose.prod.yml pull
-docker-compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.prod.yml pull
+docker compose -f docker-compose.prod.yml up -d --build
 
 # Backup database
-docker-compose -f docker-compose.prod.yml exec db mysqldump -u root -p apdate > backup.sql
+docker compose -f docker-compose.prod.yml exec db mysqldump -u root -p apdate > backup.sql
 
 # View nginx logs
-docker-compose -f docker-compose.prod.yml logs nginx
+docker compose -f docker-compose.prod.yml logs nginx
 ```
 
 ## 🎯 Production Checklist
@@ -219,17 +217,17 @@ docker-compose -f docker-compose.prod.yml logs nginx
 ### SSL Issues
 ```bash
 # Check certificates
-docker-compose -f docker-compose.prod.yml exec nginx ls -la /etc/letsencrypt/live/
+docker compose -f docker-compose.prod.yml exec nginx ls -la /etc/letsencrypt/live/
 
 # Regenerate certificates
-docker-compose -f docker-compose.prod.yml run --rm certbot delete
+docker compose -f docker-compose.prod.yml run --rm certbot delete
 ./docker/prod/ssl-setup.sh
 ```
 
 ### Domain Access Issues
 ```bash
 # Check nginx config
-docker-compose -f docker-compose.prod.yml exec nginx nginx -t
+docker compose -f docker-compose.prod.yml exec nginx nginx -t
 
 # Check DNS resolution
 dig yourdomain.com
@@ -239,10 +237,10 @@ nslookup yourdomain.com
 ### Application Issues
 ```bash
 # Check app logs
-docker-compose -f docker-compose.prod.yml logs app
+docker compose -f docker-compose.prod.yml logs app
 
 # Check database connection
-docker-compose -f docker-compose.prod.yml exec app php -r "echo 'DB: ' . getenv('DB_HOST');"
+docker compose -f docker-compose.prod.yml exec app php -r "echo 'DB: ' . getenv('DB_HOST');"
 ```
 
 ## 📊 Monitoring
@@ -250,13 +248,13 @@ docker-compose -f docker-compose.prod.yml exec app php -r "echo 'DB: ' . getenv(
 ### Log Locations
 ```bash
 # Application logs
-docker-compose -f docker-compose.prod.yml logs app
+docker compose -f docker-compose.prod.yml logs app
 
 # Nginx access/error logs
-docker-compose -f docker-compose.prod.yml logs nginx
+docker compose -f docker-compose.prod.yml logs nginx
 
 # Database logs
-docker-compose -f docker-compose.prod.yml logs db
+docker compose -f docker-compose.prod.yml logs db
 ```
 
 ### Health Checks
@@ -266,7 +264,7 @@ curl -I https://yourdomain.com
 curl -I https://admin.yourdomain.com
 
 # Database health
-docker-compose -f docker-compose.prod.yml exec db mysqladmin ping
+docker compose -f docker-compose.prod.yml exec db mysqladmin ping
 ```
 
 ## 🎉 Success!

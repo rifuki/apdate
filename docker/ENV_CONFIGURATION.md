@@ -73,7 +73,7 @@ COMPOSE_PROJECT_NAME=apdate  # Docker project name
 cp .env.example .env
 
 # Start with defaults
-docker-compose up -d
+docker compose up -d
 ```
 
 ### Production Setup
@@ -88,7 +88,7 @@ DB_PASS=secure_password_here
 ENCRYPTION_KEY=random_32_character_string
 
 # Deploy
-docker-compose up -d
+docker compose up -d
 ```
 
 ### Custom Ports (Development)
@@ -99,7 +99,7 @@ PHPMYADMIN_PORT=9001
 DB_PORT=3307
 
 # Restart
-docker-compose down && docker-compose up -d
+docker compose down && docker compose up -d
 
 # Access
 # App: http://localhost:9000
@@ -119,8 +119,8 @@ COMPOSE_PROJECT_NAME=apdate-staging
 APP_PORT=8081
 
 # Use specific env file
-docker-compose --env-file .env.dev up -d
-docker-compose --env-file .env.staging up -d
+docker compose --env-file .env.dev up -d
+docker compose --env-file .env.staging up -d
 ```
 
 ## 🔒 Security Best Practices
@@ -174,8 +174,8 @@ DB_PASS=secure_random_password
 
 4. **Test configuration**
    ```bash
-   docker-compose config  # Verify interpolation
-   docker-compose up -d   # Deploy
+   docker compose config  # Verify interpolation
+   docker compose up -d   # Deploy
    ```
 
 ## 🎯 Benefits Summary
@@ -192,7 +192,7 @@ DB_PASS=secure_random_password
 
 1. **Never commit .env** - Add to `.gitignore`
 2. **Use .env.example** - For team consistency
-3. **Validate config** - Use `docker-compose config`
+3. **Validate config** - Use `docker compose config`
 4. **Environment naming** - Use descriptive project names
 5. **Port conflicts** - Easy to change via .env
 
