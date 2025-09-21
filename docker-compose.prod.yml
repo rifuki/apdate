@@ -81,11 +81,7 @@ services:
     volumes:
       - certbot_www:/var/www/certbot
       - certbot_conf:/etc/letsencrypt
-    command: >
-      sh -c "while :; do
-        certbot renew --webroot --webroot-path=/var/www/certbot --quiet
-        sleep 12h
-      done"
+    command: sh -c "while :; do certbot renew --webroot --webroot-path=/var/www/certbot --quiet; sleep 12h; done"
     networks:
       - apdate-network
 

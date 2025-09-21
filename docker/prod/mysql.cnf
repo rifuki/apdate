@@ -11,10 +11,10 @@ max_connections = 100
 wait_timeout = 3600
 interactive_timeout = 3600
 
-# Query cache
-query_cache_type = 1
-query_cache_size = 64M
-query_cache_limit = 2M
+# Query cache removed in MySQL 8.0
+# query_cache_type = 1
+# query_cache_size = 64M
+# query_cache_limit = 2M
 
 # Temp tables
 tmp_table_size = 64M
@@ -25,7 +25,7 @@ key_buffer_size = 64M
 
 # Binary logging (for replication/backup)
 log-bin = mysql-bin
-expire_logs_days = 7
+binlog_expire_logs_seconds = 604800
 max_binlog_size = 100M
 
 # Slow query log

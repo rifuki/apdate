@@ -1,7 +1,7 @@
 # Main Application - HTTP to HTTPS Redirect
 server {
     listen 80;
-    server_name apdate.static.ninja www.apdate.static.ninja;
+    server_name example.com www.example.com;
 
     # Certbot challenge
     location /.well-known/acme-challenge/ {
@@ -16,46 +16,38 @@ server {
 
 # Main Application - HTTPS
 server {
-    listen 443 ssl;
-    http2 on;
-    server_name apdate.static.ninja www.apdate.static.ninja;
+    listen 443 ssl http2;
+    server_name example.com www.example.com;
 
     # SSL Configuration
-    ssl_certificate /etc/letsencrypt/live/apdate.static.ninja/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/apdate.static.ninja/privkey.pem;
-
-    # Modern SSL configuration
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
-    ssl_prefer_server_ciphers off;
-    ssl_session_cache shared:SSL:10m;
-    ssl_session_timeout 10m;
+    ssl_certificate /etc/letsencrypt/live/example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
     # Security headers
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 
     # Rate limiting for login pages
     location ~ ^/(siswa|guru|admin)/login {
-        limit_req zone=login burst=10 nodelay;
+        limit_req zone=login burst=3 nodelay;
         proxy_pass http://app:80;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto https;
-        proxy_set_header HTTPS on;
+        proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Port $server_port;
     }
 
     # Main application
     location / {
-        limit_req zone=general burst=50 nodelay;
+        limit_req zone=general burst=20 nodelay;
         proxy_pass http://app:80;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto https;
-        proxy_set_header HTTPS on;
+        proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Port $server_port;
 
@@ -77,7 +69,7 @@ server {
 # phpMyAdmin - HTTP to HTTPS Redirect
 server {
     listen 80;
-    server_name phpmyadmin.apdate.static.ninja;
+    server_name phpmyadmin.example.com;
 
     # Certbot challenge
     location /.well-known/acme-challenge/ {
@@ -92,33 +84,30 @@ server {
 
 # phpMyAdmin - HTTPS
 server {
-    listen 443 ssl;
-    http2 on;
-    server_name phpmyadmin.apdate.static.ninja;
+    listen 443 ssl http2;
+    server_name phpmyadmin.example.com;
 
     # SSL Configuration
-    ssl_certificate /etc/letsencrypt/live/phpmyadmin.apdate.static.ninja/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/phpmyadmin.apdate.static.ninja/privkey.pem;
-
-    # Modern SSL configuration
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
-    ssl_prefer_server_ciphers off;
-    ssl_session_cache shared:SSL:10m;
-    ssl_session_timeout 10m;
+    ssl_certificate /etc/letsencrypt/live/phpmyadmin.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/phpmyadmin.example.com/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
     # Security headers
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 
-    # Rate limiting (disabled for phpMyAdmin)
+    # IP whitelist for phpMyAdmin (optional - uncomment and set your IP)
+    # allow 203.0.113.0/24;  # Your office/home IP range
+    # deny all;
+
+    # Rate limiting
     location / {
-        # limit_req zone=login burst=5 nodelay;
+        limit_req zone=login burst=5 nodelay;
         proxy_pass http://phpmyadmin:80;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto https;
-        proxy_set_header HTTPS on;
+        proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Port $server_port;
 
